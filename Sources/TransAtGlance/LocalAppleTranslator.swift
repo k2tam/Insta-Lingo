@@ -8,8 +8,8 @@ struct LocalAppleTranslator: LocalTranslating {
     private let english = Locale.Language(identifier: "en")
     private let explainer: any LocalExplaining
 
-    init(explainer: any LocalExplaining = LocalFoundationExplainer()) {
-        self.explainer = explainer
+    init(explainer: (any LocalExplaining)? = nil) {
+        self.explainer = explainer ?? LocalFoundationExplainer()
     }
 
     func supportedTargetLanguages() async -> [TargetLanguage] {
@@ -32,15 +32,25 @@ struct LocalAppleTranslator: LocalTranslating {
             throw LocalTranslationAvailabilityError.unsupported(target.displayName)
         }
 
-        let session = TranslationSession(installedSource: english, target: targetLanguage)
-        let response = try await session.translate(request.text)
-        let meaning = response.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !meaning.isEmpty else { throw LocalTranslationError.emptyResponse }
-        var example = ""
-        if let explanation = try? await explainer.explain(request), !explanation.example.isEmpty,
-           let translated = try? await session.translate(explanation.example) {
-            example = translated.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
+        let explanation = try await explainer.explain(request)
+        let englishMeaning = explanation.meaning.trimmingCharacters(in: .whitespacesAndNewlines)
+        let englishExample = explanation.example.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !englishMeaning.isEmpty, !englishExample.isEmpty else {
+            throw LocalTranslationError.invalidExplanation
         }
+
+        let session = TranslationSession(installedSource: english, target: targetLanguage)
+        let meaning: String
+        let example: String
+        do {
+            let meaningResponse = try await session.translate(englishMeaning)
+            let exampleResponse = try await session.translate(englishExample)
+            meaning = meaningResponse.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
+            example = exampleResponse.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
+        } catch {
+            throw LocalTranslationError.translationFailed
+        }
+        guard !meaning.isEmpty, !example.isEmpty else { throw LocalTranslationError.emptyResponse }
         return LookupResult(meaning: meaning, example: example, detail: "Translated on this Mac from English to \(target.displayName).")
     }
 }
@@ -60,9 +70,18 @@ private enum LocalTranslationAvailabilityError: LocalizedError, LocalLookupUnava
 }
 
 private enum LocalTranslationError: LocalizedError {
+    case invalidExplanation
+    case translationFailed
     case emptyResponse
 
     var errorDescription: String? {
-        "Apple Translation did not return a usable translation. Try again."
+        switch self {
+        case .invalidExplanation:
+            "The on-device model did not return a usable explanation and example. Try again."
+        case .translationFailed:
+            "Apple Translation could not translate the explanation and example. Try again."
+        case .emptyResponse:
+            "Apple Translation did not return a usable explanation and example. Try again."
+        }
     }
 }

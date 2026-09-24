@@ -68,8 +68,8 @@ struct FavoritesWindow: View {
         }
         .frame(minWidth: 680, minHeight: 400)
         .safeAreaInset(edge: .bottom) {
-            if let error = favorites.persistenceError {
-                Text(error)
+            if favorites.persistenceError != nil {
+                Text(strings.storageUnavailable)
                     .font(.caption)
                     .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)

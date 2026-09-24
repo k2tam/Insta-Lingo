@@ -52,6 +52,7 @@ public struct UIStrings: Sendable {
     public var idle: String { choose("Nhập từ hoặc cụm ngắn để xem nghĩa.", "Type a word or short phrase to see its meaning.") }
     public var loading: String { choose("Đang tra trên máy…", "Looking up on this Mac…") }
     public var moreDetail: String { choose("Xem thêm", "More detail") }
+    public var storageUnavailable: String { choose("Không thể lưu dữ liệu trên máy. Hãy kiểm tra dung lượng và quyền truy cập rồi thử lại.", "Could not save data on this Mac. Check storage space and permissions, then try again.") }
     public var newContext: String { choose("Ngữ cảnh mới…", "New context…") }
     public var newProfessionalContext: String { choose("Ngữ cảnh chuyên môn mới", "New professional context") }
     public var contextName: String { choose("Tên", "Name") }
@@ -132,6 +133,9 @@ public struct UIStrings: Sendable {
             "The on-device model is unavailable right now.": "Mô hình trên máy hiện không khả dụng.",
             "The on-device model did not return a usable explanation. Try again.": "Mô hình trên máy không trả về giải nghĩa dùng được. Hãy thử lại.",
             "Apple Translation did not return a usable translation. Try again.": "Apple Translation không trả về bản dịch dùng được. Hãy thử lại.",
+            "The on-device model did not return a usable explanation and example. Try again.": "Mô hình trên máy không trả về giải nghĩa và ví dụ dùng được. Hãy thử lại.",
+            "Apple Translation could not translate the explanation and example. Try again.": "Apple Translation không thể dịch giải nghĩa và ví dụ. Hãy thử lại.",
+            "Apple Translation did not return a usable explanation and example. Try again.": "Apple Translation không trả về giải nghĩa và ví dụ dùng được. Hãy thử lại.",
             "No readable text was found in the selected region. Try selecting a clearer area.": "Không tìm thấy chữ đọc được trong vùng chọn. Hãy chọn vùng rõ hơn.",
             "Choose an English word or short phrase from the recognized text.": "Chọn một từ hoặc cụm tiếng Anh trong chữ đã nhận diện.",
             "Choose a phrase and optional sentence from the selected text. The sentence must contain the phrase.": "Chọn từ hoặc cụm cùng câu ngữ cảnh trong phần chữ đã chọn. Câu phải chứa từ hoặc cụm cần tra.",

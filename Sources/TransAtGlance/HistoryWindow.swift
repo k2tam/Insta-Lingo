@@ -60,8 +60,8 @@ struct HistoryWindow: View {
             HStack {
                 Toggle(strings.saveHistory, isOn: $history.isEnabled)
                 Spacer()
-                if let error = history.persistenceError {
-                    Text(error).font(.caption).foregroundStyle(.red)
+                if history.persistenceError != nil {
+                    Text(strings.storageUnavailable).font(.caption).foregroundStyle(.red)
                 }
             }
             .padding(10)

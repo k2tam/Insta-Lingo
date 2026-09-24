@@ -230,8 +230,8 @@ struct LookupPanel: View {
                     }
                 }
             }
-            if let error = favorites.persistenceError {
-                Text(error).font(.caption).foregroundStyle(.red)
+            if favorites.persistenceError != nil {
+                Text(strings.storageUnavailable).font(.caption).foregroundStyle(.red)
             }
         }
         .padding(16)
@@ -244,8 +244,14 @@ struct LookupPanel: View {
             accessibilitySentence = ""
         }
         .onChange(of: ocrFlow.recognizedText) { old, new in
-            if old.isEmpty {
+            if new.isEmpty {
+                ocrPhrase = ""
+                ocrSentence = ""
+            } else if old.isEmpty || ocrPhrase == old {
                 ocrPhrase = new
+            }
+            let sentence = ocrSentence.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !sentence.isEmpty && !new.contains(sentence) {
                 ocrSentence = ""
             }
         }
