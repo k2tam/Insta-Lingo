@@ -3,7 +3,7 @@ import LookupCore
 import Security
 
 struct GroqKeychain: GroqCredentialStoring {
-    private let service = "com.k2tam.TransAtGlance.groq"
+    private let service = "com.k2tam.InstaLingo.groq"
     private let account = "api-key"
 
     func read() throws -> String? {

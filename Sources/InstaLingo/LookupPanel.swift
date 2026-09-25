@@ -147,7 +147,7 @@ private struct LookupPanelHeader: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Text("TransAtGlance")
+            Text("Insta Lingo")
                 .font(.headline)
 
             Spacer()

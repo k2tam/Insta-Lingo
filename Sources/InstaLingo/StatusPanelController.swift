@@ -12,7 +12,7 @@ final class StatusPanelController: NSObject {
     override init() {
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         super.init()
-        item.button?.image = NSImage(systemSymbolName: "text.book.closed", accessibilityDescription: "TransAtGlance")
+        item.button?.image = NSImage(systemSymbolName: "text.book.closed", accessibilityDescription: "Insta Lingo")
         item.button?.target = self
         item.button?.action = #selector(togglePanel)
         popover.behavior = .transient

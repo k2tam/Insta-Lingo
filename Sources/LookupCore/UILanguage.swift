@@ -124,7 +124,7 @@ public struct UIStrings: Sendable {
     public var recognizingRegion: String { choose("Đang nhận diện chữ trong vùng chọn…", "Recognizing text in the selected region…") }
     public var lookupSelection: String { choose("Tra chữ đang bôi đen", "Look up selected text") }
     public var readingSelection: String { choose("Đang đọc phần chữ đã chọn…", "Reading selected text…") }
-    public var accessibilityPermissionNeeded: String { choose("Cần quyền Trợ năng để đọc chữ đã bôi đen. Cấp quyền cho TransAtGlance trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Trợ năng, rồi thử lại.", "Accessibility permission is needed to read selected text. Enable TransAtGlance in System Settings → Privacy & Security → Accessibility, then try again.") }
+    public var accessibilityPermissionNeeded: String { choose("Cần quyền Trợ năng để đọc chữ đã bôi đen. Cấp quyền cho Insta Lingo trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Trợ năng, rồi thử lại.", "Accessibility permission is needed to read selected text. Enable Insta Lingo in System Settings → Privacy & Security → Accessibility, then try again.") }
     public var retrySelection: String { choose("Thử đọc lại", "Retry selection") }
     public var selectionUnavailable: String { choose("Không đọc được chữ đang bôi đen trong ứng dụng trước đó. Bạn có thể chọn vùng màn hình để nhận diện chữ.", "The previous app did not provide selected text. You can select a screen region to recognize it.") }
     public var selectRegionInstead: String { choose("Chọn vùng thay thế", "Select region instead") }
@@ -171,7 +171,7 @@ public struct UIStrings: Sendable {
             "Apple Translation could not translate the explanation and example. Try again.": "Apple Translation không thể dịch giải nghĩa và ví dụ. Hãy thử lại.",
             "Apple Translation did not return a usable explanation and example. Try again.": "Apple Translation không trả về giải nghĩa và ví dụ dùng được. Hãy thử lại.",
             "No readable text was found in the selected region. Try selecting a clearer area.": "Không tìm thấy chữ đọc được trong vùng chọn. Hãy chọn vùng rõ hơn.",
-            "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app.": "macOS chưa cho phép chụp vùng màn hình này. Hãy bật TransAtGlance trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Ghi màn hình & âm thanh hệ thống, rồi thoát hẳn và mở lại ứng dụng.",
+            "macOS did not authorize this screen capture. Enable Insta Lingo in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app.": "macOS chưa cho phép chụp vùng màn hình này. Hãy bật Insta Lingo trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Ghi màn hình & âm thanh hệ thống, rồi thoát hẳn và mở lại ứng dụng.",
             "Could not capture the selected screen. Try again.": "Không thể chụp vùng màn hình đã chọn. Hãy thử lại.",
             "Groq is not configured for this app.": "Ứng dụng chưa được cấu hình để dùng Groq.",
             "Add a Groq API key in settings before using Groq.": "Thêm khóa Groq API trong cài đặt trước khi sử dụng Groq.",

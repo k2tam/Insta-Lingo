@@ -43,7 +43,7 @@ public final class LookupFavorites {
         self.fileManager = fileManager
         self.fileURL = fileURL ?? fileManager.urls(for: .applicationSupportDirectory,
                                                    in: .userDomainMask)[0]
-            .appendingPathComponent("TransAtGlance", isDirectory: true)
+            .appendingPathComponent("InstaLingo", isDirectory: true)
             .appendingPathComponent("favorites.json")
         do {
             if fileManager.fileExists(atPath: self.fileURL.path) {

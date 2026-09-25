@@ -18,7 +18,7 @@ private enum AppRuntime {
 }
 
 @main
-struct TransAtGlanceApp: App {
+struct InstaLingoApp: App {
     @State private var lookup: LookupCoordinator
     @State private var groqConfiguration: GroqConfiguration
     @State private var history: LookupHistory
@@ -97,8 +97,12 @@ struct TransAtGlanceApp: App {
             case .openPanel:
                 statusPanel?.show()
             case .selectedText:
-                statusPanel?.show(focusInput: false)
-                Task { await selectionFlow.start(lookup: lookup) }
+                // Read before activating our popover. Some source apps clear
+                // their selection as soon as another application takes focus.
+                Task {
+                    await selectionFlow.start(lookup: lookup)
+                    statusPanel?.show(focusInput: false)
+                }
             case .screenRegion:
                 selectionFlow.reset()
                 Task {

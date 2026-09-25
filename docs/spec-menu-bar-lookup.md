@@ -6,7 +6,7 @@ Khi đọc tài liệu trên Mac, người dùng gặp một từ hoặc cụm t
 
 ## Solution
 
-TransAtGlance là tiện ích menu bar dành cho Mac Apple Silicon chạy macOS mới. Một **lượt tra** bắt đầu từ nhập tay, phần chữ đã bôi đen hoặc **vùng chọn màn hình** được nhận diện bằng OCR. Bảng tra neo dưới icon menu bar hiển thị **kết quả tra** ngắn gồm nghĩa chính, ví dụ theo **ngữ cảnh chuyên môn** và nút mở rộng. Người dùng có thể chọn dịch sang tiếng Việt, ngôn ngữ đích khác khi được hỗ trợ, hoặc nhận **giải nghĩa đơn giản** bằng tiếng Anh. Bảng tự đóng khi quay lại tài liệu và giữ kết quả gần nhất.
+Insta Lingo là tiện ích menu bar dành cho Mac Apple Silicon chạy macOS mới. Một **lượt tra** bắt đầu từ nhập tay, phần chữ đã bôi đen hoặc **vùng chọn màn hình** được nhận diện bằng OCR. Bảng tra neo dưới icon menu bar hiển thị **kết quả tra** ngắn gồm nghĩa chính, ví dụ theo **ngữ cảnh chuyên môn** và nút mở rộng. Người dùng có thể chọn dịch sang tiếng Việt, ngôn ngữ đích khác khi được hỗ trợ, hoặc nhận **giải nghĩa đơn giản** bằng tiếng Anh. Bảng tự đóng khi quay lại tài liệu và giữ kết quả gần nhất.
 
 Groq chạy `openai/gpt-oss-120b` là nguồn mặc định để giải nghĩa và dịch theo ngữ cảnh sau khi người dùng thêm API key. Apple Foundation Models và Apple Translation là nguồn xử lý trên máy thay thế cho các máy và cặp ngôn ngữ được hỗ trợ. Cửa sổ ứng dụng riêng dùng để xem **lịch sử tra**, **mục yêu thích** và cài đặt.
 

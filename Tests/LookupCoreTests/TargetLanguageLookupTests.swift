@@ -86,5 +86,5 @@ private enum TranslationFailure: LocalizedError {
 }
 
 private func isolatedPreferences() -> UserDefaults {
-    UserDefaults(suiteName: "TransAtGlance.TargetTests.\(UUID().uuidString)")!
+    UserDefaults(suiteName: "InstaLingo.TargetTests.\(UUID().uuidString)")!
 }

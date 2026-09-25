@@ -1,4 +1,4 @@
-# TransAtGlance
+# Insta Lingo
 
 Ứng dụng giúp tra nghĩa nhanh trong lúc đọc nội dung trên macOS.
 

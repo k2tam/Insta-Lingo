@@ -29,7 +29,7 @@ func favoritesKeepSeparateResultsForEachLanguageAndContext() throws {
 func clearingHistoryKeepsFavoritesAfterRestart() throws {
     let favoriteURL = favoritesFixture()
     let historyURL = favoriteURL.deletingLastPathComponent().appendingPathComponent("history.json")
-    let defaults = UserDefaults(suiteName: "TransAtGlance.FavoritesTests.\(UUID().uuidString)")!
+    let defaults = UserDefaults(suiteName: "InstaLingo.FavoritesTests.\(UUID().uuidString)")!
     let history = LookupHistory(fileURL: historyURL, preferences: defaults)
     let favorites = LookupFavorites(fileURL: favoriteURL)
     let result = LookupResult(meaning: "diễn viên", example: "The actor bowed.", detail: "stage")
@@ -48,6 +48,6 @@ func clearingHistoryKeepsFavoritesAfterRestart() throws {
 
 private func favoritesFixture() -> URL {
     FileManager.default.temporaryDirectory
-        .appendingPathComponent("TransAtGlance-FavoritesTests-\(UUID().uuidString)", isDirectory: true)
+        .appendingPathComponent("InstaLingo-FavoritesTests-\(UUID().uuidString)", isDirectory: true)
         .appendingPathComponent("favorites.json")
 }

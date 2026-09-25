@@ -7,4 +7,4 @@ build/
 .swiftpm/xcode/xcshareddata/*
 !.swiftpm/xcode/xcshareddata/xcschemes/
 .swiftpm/xcode/xcshareddata/xcschemes/*
-!.swiftpm/xcode/xcshareddata/xcschemes/TransAtGlance.xcscheme
+!.swiftpm/xcode/xcshareddata/xcschemes/InstaLingo.xcscheme

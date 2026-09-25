@@ -88,6 +88,6 @@ private enum TestError: LocalizedError {
 }
 
 private func testPreferences() -> UserDefaults {
-    let suite = "TransAtGlance.Tests.\(UUID().uuidString)"
+    let suite = "InstaLingo.Tests.\(UUID().uuidString)"
     return UserDefaults(suiteName: suite)!
 }

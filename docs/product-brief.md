@@ -1,4 +1,4 @@
-# TransAtGlance — bản thiết kế đã trao đổi
+# Insta Lingo — bản thiết kế đã trao đổi
 
 ## Mục tiêu
 

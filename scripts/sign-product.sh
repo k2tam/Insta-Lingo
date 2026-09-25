@@ -16,5 +16,5 @@ if [ -z "$identity" ]; then
     exit 1
 fi
 
-codesign --force --sign "$identity" --identifier com.k2tam.TransAtGlance "$product"
+codesign --force --sign "$identity" --identifier com.k2tam.InstaLingo "$product"
 codesign --verify --strict "$product"

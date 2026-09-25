@@ -7,6 +7,9 @@ import Vision
 @MainActor
 final class ScreenRegionOCR: RegionTextRecognizing {
     func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
+        guard CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() else {
+            throw ScreenRegionError.permissionDenied
+        }
         let session = ScreenRegionSelectionSession()
         guard let region = await session.selectRegion() else { return nil }
         await onSelection()
@@ -59,7 +62,7 @@ private enum ScreenRegionError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
+            "macOS did not authorize this screen capture. Enable Insta Lingo in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
         case .displayUnavailable:
             "Could not capture the selected screen. Try again."
         }
@@ -81,52 +84,57 @@ private final class ScreenRegionSelectionSession {
     func selectRegion() async -> SelectedRegion? {
         // NSScreen.screens starts with the menu-bar (main) display, whose top
         // edge is the origin for ScreenCaptureKit's global display space.
-        guard let mainScreen = NSScreen.screens.first else { return nil }
+        let screens = NSScreen.screens
+        guard let mainScreen = screens.first else { return nil }
         let mainFrame = mainScreen.frame
-        for screen in NSScreen.screens {
-            let overlay = RegionSelectionView(frame: CGRect(origin: .zero, size: screen.frame.size))
-            overlay.onFinish = { [weak self] localRect in
-                guard let self else { return }
-                let selectedRegion = localRect.flatMap { rect -> SelectedRegion? in
-                    guard let displayID = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value else { return nil }
-                    return SelectedRegion(
-                        rect: ScreenCaptureRegionMapping.captureRect(
-                            localRect: rect,
-                            screenFrame: screen.frame,
-                            mainScreenFrame: mainFrame
-                        ),
-                        displayID: displayID
-                    )
+        return await withCheckedContinuation { continuation in
+            // Install the continuation before exposing any overlay. Otherwise
+            // a quick click or Escape can arrive first and be dropped forever.
+            self.continuation = continuation
+
+            for screen in screens {
+                let overlay = RegionSelectionView(frame: CGRect(origin: .zero, size: screen.frame.size))
+                overlay.onFinish = { [weak self] localRect in
+                    guard let self else { return }
+                    let selectedRegion = localRect.flatMap { rect -> SelectedRegion? in
+                        guard let displayID = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value else { return nil }
+                        return SelectedRegion(
+                            rect: ScreenCaptureRegionMapping.captureRect(
+                                localRect: rect,
+                                screenFrame: screen.frame,
+                                mainScreenFrame: mainFrame
+                            ),
+                            displayID: displayID
+                        )
+                    }
+                    self.finish(with: selectedRegion)
                 }
-                self.finish(with: selectedRegion)
+
+                let window = RegionSelectionPanel(
+                    contentRect: screen.frame,
+                    styleMask: [.borderless, .nonactivatingPanel],
+                    backing: .buffered,
+                    defer: false,
+                    screen: screen
+                )
+                window.isOpaque = false
+                window.backgroundColor = .clear
+                window.level = .screenSaver
+                window.hidesOnDeactivate = false
+                window.ignoresMouseEvents = false
+                window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary, .ignoresCycle]
+                window.contentView = overlay
+                window.makeFirstResponder(overlay)
+                windows.append(window)
+                window.orderFrontRegardless()
             }
 
-            let window = RegionSelectionPanel(
-                contentRect: screen.frame,
-                styleMask: [.borderless, .nonactivatingPanel],
-                backing: .buffered,
-                defer: false,
-                screen: screen
-            )
-            window.isOpaque = false
-            window.backgroundColor = .clear
-            window.level = .screenSaver
-            window.hidesOnDeactivate = false
-            window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-            window.contentView = overlay
-            window.makeFirstResponder(overlay)
-            windows.append(window)
-            window.orderFrontRegardless()
-        }
-        // Escape works on the display where the pointer starts; clicking any
-        // other overlay makes that panel key for the drag and subsequent Escape.
-        if let pointerWindow = windows.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) {
-            pointerWindow.makeKey()
-        }
-        NSCursor.crosshair.push()
-
-        return await withCheckedContinuation { continuation in
-            self.continuation = continuation
+            // A nonactivating panel can become key without stealing focus from
+            // the document app. Doing both operations together makes the first
+            // drag and Escape reliably reach the overlay.
+            let pointerWindow = windows.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? windows.first
+            pointerWindow?.makeKeyAndOrderFront(nil)
+            NSCursor.crosshair.push()
         }
     }
 

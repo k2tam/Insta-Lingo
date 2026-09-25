@@ -4,7 +4,7 @@ import Testing
 
 @Test @MainActor
 func interfaceLanguagePersistsIndependentlyOfLookupLanguage() {
-    let defaults = UserDefaults(suiteName: "TransAtGlance.UILanguageTests.\(UUID().uuidString)")!
+    let defaults = UserDefaults(suiteName: "InstaLingo.UILanguageTests.\(UUID().uuidString)")!
     let settings = UILanguageSettings(defaults: defaults)
     #expect(settings.language == .vietnamese)
     #expect(settings.strings.lookup == "Tra nghĩa")
@@ -18,7 +18,7 @@ func interfaceLanguagePersistsIndependentlyOfLookupLanguage() {
 
 @Test @MainActor
 func invalidSavedLanguageFallsBackToVietnamese() {
-    let defaults = UserDefaults(suiteName: "TransAtGlance.UILanguageTests.\(UUID().uuidString)")!
+    let defaults = UserDefaults(suiteName: "InstaLingo.UILanguageTests.\(UUID().uuidString)")!
     defaults.set("fr", forKey: UILanguageSettings.storageKey)
     #expect(UILanguageSettings(defaults: defaults).language == .vietnamese)
 }
@@ -40,7 +40,7 @@ func lookupInteractionStringsAreAvailableInBothInterfaceLanguages() {
 func localizedMessagesCoverCurrentLookupAndPermissionFailures() {
     let vietnamese = UIStrings(language: .vietnamese)
     let english = UIStrings(language: .english)
-    let permission = "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
+    let permission = "macOS did not authorize this screen capture. Enable Insta Lingo in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
     #expect(vietnamese.errorMessage(permission).contains("thoát hẳn"))
     #expect(english.errorMessage(permission) == permission)
     #expect(vietnamese.errorMessage("Enter an English word or short phrase to look up.") == "Nhập từ hoặc cụm tiếng Anh cần tra.")

@@ -51,7 +51,7 @@ public final class LookupHistory {
         self.fileManager = fileManager
         self.fileURL = fileURL ?? fileManager.urls(for: .applicationSupportDirectory,
                                                    in: .userDomainMask)[0]
-            .appendingPathComponent("TransAtGlance", isDirectory: true)
+            .appendingPathComponent("InstaLingo", isDirectory: true)
             .appendingPathComponent("history.json")
         isEnabled = preferences.object(forKey: Self.enabledKey) as? Bool ?? true
         do {

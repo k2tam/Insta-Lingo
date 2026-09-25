@@ -4,21 +4,21 @@
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:TransAtGlance}",
-            "name": "Debug TransAtGlance",
-            "target": "TransAtGlance",
+            "cwd": "${workspaceFolder}",
+            "name": "Debug InstaLingo",
+            "target": "InstaLingo",
             "configuration": "debug",
-            "preLaunchTask": "swift: Build Debug TransAtGlance"
+            "preLaunchTask": "swift: Build Debug InstaLingo"
         },
         {
             "type": "swift",
             "request": "launch",
             "args": [],
-            "cwd": "${workspaceFolder:TransAtGlance}",
-            "name": "Release TransAtGlance",
-            "target": "TransAtGlance",
+            "cwd": "${workspaceFolder}",
+            "name": "Release InstaLingo",
+            "target": "InstaLingo",
             "configuration": "release",
-            "preLaunchTask": "swift: Build Release TransAtGlance"
+            "preLaunchTask": "swift: Build Release InstaLingo"
         }
     ]
 }

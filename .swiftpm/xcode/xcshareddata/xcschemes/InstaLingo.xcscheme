@@ -6,6 +6,23 @@
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES"
       buildArchitectures = "Automatic">
+      <PostActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Package Insta Lingo app bundle"
+               scriptText = "sh &quot;$(dirname &quot;$WORKSPACE_PATH&quot;)/../../scripts/package-app.sh&quot; &quot;$BUILT_PRODUCTS_DIR/InstaLingo&quot; &quot;$BUILT_PRODUCTS_DIR/Insta Lingo.app&quot;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "InstaLingo"
+                     BuildableName = "InstaLingo"
+                     ReferencedContainer = "container:">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PostActions>
       <BuildActionEntries>
          <BuildActionEntry
             buildForTesting = "YES"
@@ -15,29 +32,12 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "TransAtGlance"
-               BuildableName = "TransAtGlance"
+               BlueprintIdentifier = "InstaLingo"
+               BuildableName = "InstaLingo"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
-      <PostActions>
-         <ExecutionAction
-            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
-            <ActionContent
-               title = "Sign TransAtGlance for macOS permissions"
-               scriptText = "sh &quot;$(dirname &quot;$WORKSPACE_PATH&quot;)/../../scripts/sign-product.sh&quot; &quot;$BUILT_PRODUCTS_DIR/TransAtGlance&quot;">
-               <EnvironmentBuildable>
-                  <BuildableReference
-                     BuildableIdentifier = "primary"
-                     BlueprintIdentifier = "TransAtGlance"
-                     BuildableName = "TransAtGlance"
-                     ReferencedContainer = "container:">
-                  </BuildableReference>
-               </EnvironmentBuildable>
-            </ActionContent>
-         </ExecutionAction>
-      </PostActions>
    </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
@@ -68,15 +68,27 @@
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES"
       queueDebuggingEnabled = "No">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "TransAtGlance"
-            BuildableName = "TransAtGlance"
-            ReferencedContainer = "container:">
-         </BuildableReference>
-      </BuildableProductRunnable>
+      <PreActions>
+         <ExecutionAction
+            ActionType = "Xcode.IDEStandardExecutionActionsCore.ExecutionActionType.ShellScriptAction">
+            <ActionContent
+               title = "Launch Insta Lingo app bundle"
+               scriptText = "pkill -x InstaLingo 2&gt;/dev/null || true&#10;open -n &quot;$BUILT_PRODUCTS_DIR/Insta Lingo.app&quot;">
+               <EnvironmentBuildable>
+                  <BuildableReference
+                     BuildableIdentifier = "primary"
+                     BlueprintIdentifier = "InstaLingo"
+                     BuildableName = "InstaLingo"
+                     ReferencedContainer = "container:">
+                  </BuildableReference>
+               </EnvironmentBuildable>
+            </ActionContent>
+         </ExecutionAction>
+      </PreActions>
+      <PathRunnable
+         runnableDebuggingMode = "0"
+         FilePath = "/usr/bin/true">
+      </PathRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -84,15 +96,10 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable
-         runnableDebuggingMode = "0">
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "TransAtGlance"
-            BuildableName = "TransAtGlance"
-            ReferencedContainer = "container:">
-         </BuildableReference>
-      </BuildableProductRunnable>
+      <PathRunnable
+         runnableDebuggingMode = "0"
+         FilePath = "/usr/bin/true">
+      </PathRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

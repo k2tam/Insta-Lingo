@@ -81,7 +81,7 @@ private enum HistoryProviderError: LocalizedError {
 private func historyFixture() -> (URL, UserDefaults) {
     let id = UUID().uuidString
     let url = FileManager.default.temporaryDirectory
-        .appendingPathComponent("TransAtGlance-HistoryTests-\(id)", isDirectory: true)
+        .appendingPathComponent("InstaLingo-HistoryTests-\(id)", isDirectory: true)
         .appendingPathComponent("history.json")
-    return (url, UserDefaults(suiteName: "TransAtGlance.HistoryTests.\(id)")!)
+    return (url, UserDefaults(suiteName: "InstaLingo.HistoryTests.\(id)")!)
 }

@@ -1,7 +1,7 @@
 # Design QA — Lookup panel refresh
 
 - Source visual truth: `Prototypes/lookup-panel/index.html?variant=A`
-- Implementation: `Sources/TransAtGlance/LookupPanel.swift`
+- Implementation: `Sources/InstaLingo/LookupPanel.swift`
 - Intended viewport: 680 pt wide macOS popover, system display density
 - State: idle, loading, review, error, and result states
 - Source pixels: unavailable; the integrated browser is not available in this session

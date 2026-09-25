@@ -2,7 +2,7 @@
 
 Question: which wider panel layout best prioritizes choosing a professional context and reading the lookup result?
 
-Decision (2026-09-24): variant `A` was selected. Its wide single-column hierarchy is implemented in `Sources/TransAtGlance/LookupPanel.swift`; result-language selection stays in the panel, while provider and interface-language controls move to Settings.
+Decision (2026-09-24): variant `A` was selected. Its wide single-column hierarchy is implemented in `Sources/InstaLingo/LookupPanel.swift`; result-language selection stays in the panel, while provider and interface-language controls move to Settings.
 
 Run from the repository root:
 
