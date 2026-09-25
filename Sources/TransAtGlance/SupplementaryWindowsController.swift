@@ -41,6 +41,7 @@ final class SupplementaryWindowsController {
     func showSettings<Content: View>(content: Content) {
         if settingsWindow == nil {
             settingsWindow = makeWindow(content: content)
+            settingsWindow?.contentMinSize = NSSize(width: 640, height: 420)
         }
         show(settingsWindow, title: languageSettings.strings.settingsTitle)
     }
@@ -54,6 +55,7 @@ final class SupplementaryWindowsController {
         )
         window.contentViewController = NSHostingController(rootView: content)
         window.isReleasedWhenClosed = false
+        window.collectionBehavior.insert(.moveToActiveSpace)
         window.center()
         return window
     }
@@ -61,7 +63,10 @@ final class SupplementaryWindowsController {
     private func show(_ window: NSWindow?, title: String) {
         guard let window else { return }
         window.title = title
-        NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        // A menu bar app may still be activating; order the window in front
+        // even when another app is currently active.
+        window.orderFrontRegardless()
     }
 }

@@ -35,7 +35,7 @@ final class GlobalHotkeyManager {
         for action in HotkeyAction.allCases { registerStored(action) }
     }
 
-    deinit {
+    isolated deinit {
         for reference in references.values { UnregisterEventHotKey(reference) }
         if let eventHandler { RemoveEventHandler(eventHandler) }
     }

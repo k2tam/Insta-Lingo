@@ -12,29 +12,45 @@ struct GlobalHotkeySettingsView: View {
 
     var body: some View {
         Form {
-            Section(strings.hotkeysTitle) {
+            Section {
                 ForEach(HotkeyAction.allCases) { action in
-                    HStack {
-                        Text(strings.hotkeyActionName(action))
-                        Spacer()
-                        Text(recordingAction == action ? strings.hotkeyRecording : manager.assignments[action].displayName)
-                            .monospaced()
-                        Button(strings.hotkeyChange) { beginRecording(action) }
-                            .accessibilityLabel("\(strings.hotkeyChange): \(strings.hotkeyActionName(action))")
-                    }
-                    if invalidAction == action {
-                        Text(strings.hotkeyInvalid)
-                            .foregroundStyle(.red)
-                    } else if let status = manager.registrationErrors[action] {
-                        Text(status == OSStatus(eventHotKeyExistsErr) ? strings.hotkeyConflict : strings.hotkeyRegistrationFailed)
-                            .foregroundStyle(.red)
+                    VStack(alignment: .leading, spacing: 6) {
+                        HStack(spacing: 12) {
+                            Text(strings.hotkeyActionName(action))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            Text(recordingAction == action ? "…" : manager.assignments[action].displayName)
+                                .font(.system(.body, design: .monospaced))
+                                .frame(minWidth: 72, alignment: .trailing)
+                            Button(recordingAction == action ? strings.cancel : strings.hotkeyChange) {
+                                if recordingAction == action {
+                                    stopRecording()
+                                } else {
+                                    beginRecording(action)
+                                }
+                            }
+                            .accessibilityLabel("\(recordingAction == action ? strings.cancel : strings.hotkeyChange): \(strings.hotkeyActionName(action))")
+                        }
+
+                        if recordingAction == action {
+                            Text(strings.hotkeyRecording)
+                                .foregroundStyle(.secondary)
+                        } else if invalidAction == action {
+                            Text(strings.hotkeyInvalid)
+                                .foregroundStyle(.red)
+                        } else if let status = manager.registrationErrors[action] {
+                            Text(status == OSStatus(eventHotKeyExistsErr) ? strings.hotkeyConflict : strings.hotkeyRegistrationFailed)
+                                .foregroundStyle(.red)
+                        }
                     }
                 }
+            } header: {
+                Text(strings.hotkeysTitle)
+            } footer: {
                 Text(strings.hotkeyCancelHint)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
         }
+        .formStyle(.grouped)
+        .padding()
         .onDisappear { stopRecording() }
     }
 

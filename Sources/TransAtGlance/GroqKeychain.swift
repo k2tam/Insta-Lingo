@@ -2,8 +2,8 @@ import Foundation
 import LookupCore
 import Security
 
-struct GeminiKeychain: GeminiCredentialStoring {
-    private let service = "com.k2tam.TransAtGlance.gemini"
+struct GroqKeychain: GroqCredentialStoring {
+    private let service = "com.k2tam.TransAtGlance.groq"
     private let account = "api-key"
 
     func read() throws -> String? {
@@ -12,7 +12,7 @@ struct GeminiKeychain: GeminiCredentialStoring {
         if status == errSecItemNotFound { return nil }
         guard status == errSecSuccess, let data = item as? Data,
               let key = String(data: data, encoding: .utf8) else {
-            throw GeminiKeychainError.unavailable
+            throw GroqKeychainError.unavailable
         }
         return key
     }
@@ -23,17 +23,17 @@ struct GeminiKeychain: GeminiCredentialStoring {
         if status == errSecDuplicateItem {
             let update = [kSecValueData as String: data] as CFDictionary
             guard SecItemUpdate(query() as CFDictionary, update) == errSecSuccess else {
-                throw GeminiKeychainError.unavailable
+                throw GroqKeychainError.unavailable
             }
         } else if status != errSecSuccess {
-            throw GeminiKeychainError.unavailable
+            throw GroqKeychainError.unavailable
         }
     }
 
     func delete() throws {
         let status = SecItemDelete(query() as CFDictionary)
         guard status == errSecSuccess || status == errSecItemNotFound else {
-            throw GeminiKeychainError.unavailable
+            throw GroqKeychainError.unavailable
         }
     }
 
@@ -55,6 +55,6 @@ struct GeminiKeychain: GeminiCredentialStoring {
     }
 }
 
-private enum GeminiKeychainError: Error {
+private enum GroqKeychainError: Error {
     case unavailable
 }

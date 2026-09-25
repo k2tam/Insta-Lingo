@@ -6,7 +6,7 @@ import Testing
 func defaultHotkeysAreDistinctAndValid() {
     let shortcuts = HotkeyAction.allCases.map(\.defaultShortcut)
     #expect(Set(shortcuts).count == shortcuts.count)
-    #expect(shortcuts.allSatisfy(\.isValid))
+    #expect(shortcuts.allSatisfy { $0.isValid })
 }
 
 @Test

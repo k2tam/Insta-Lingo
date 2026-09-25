@@ -3,59 +3,40 @@ import Testing
 @testable import LookupCore
 
 @Test @MainActor
-func accessibilityReviewSendsOnlyChosenPhraseAndSentence() async {
-    let source = "A Swift actor protects mutable state. Unselected material is unavailable."
+func selectedPassageUsesOnlyChosenPhraseAndProfessionalContext() async {
+    let source = "A Swift actor protects mutable state."
     let explainer = ContextRecordingExplainer()
     let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
     lookup.selectedLanguage = .simpleEnglish
+    lookup.contextCatalog.select(id: ProfessionalContext.swiftIOS.id)
     let flow = SelectionLookupFlow(reader: ContextTextReader(text: source))
 
-    await flow.start(lookup: lookup, reviewSelection: true)
+    await flow.start(lookup: lookup)
     #expect(flow.status == .reviewing)
+    #expect(lookup.text == source)
     #expect(explainer.requests.isEmpty)
 
-    await flow.confirm(lookup: lookup, phrase: "actor", sentence: "A Swift actor protects mutable state.")
-    #expect(explainer.requests == [LookupRequest(text: "actor", selectedSentence: "A Swift actor protects mutable state.")])
+    await lookup.submit(selectedPhrase: "actor")
+    #expect(lookup.text == "actor")
+    #expect(explainer.requests == [LookupRequest(text: "actor", context: .swiftIOS)])
 }
 
 @Test @MainActor
-func accessibilityReviewRejectsContextOutsideTheSelectedText() async {
-    let explainer = ContextRecordingExplainer()
-    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
-    let flow = SelectionLookupFlow(reader: ContextTextReader(text: "An actor protects state."))
-    await flow.start(lookup: lookup, reviewSelection: true)
-
-    await flow.confirm(lookup: lookup, phrase: "actor", sentence: "The actor owns all state.")
-    #expect(flow.status == .reviewing)
-    #expect(flow.errorMessage != nil)
-    #expect(explainer.requests.isEmpty)
-}
-
-@Test @MainActor
-func ocrReviewSendsOnlyChosenPhraseAndSentence() async {
+func ocrPassageUsesOnlyChosenPhraseAndProfessionalContext() async {
     let explainer = ContextRecordingExplainer()
     let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
     lookup.selectedLanguage = .simpleEnglish
+    lookup.contextCatalog.select(id: ProfessionalContext.softwareDevelopment.id)
     let source = "Swift actors protect mutable state.\nAnother line."
     let flow = OCRLookupFlow(recognizer: ContextRecognizer(text: source))
+
     await flow.start(lookup: lookup, hidePanel: {}, showPanel: {})
     #expect(flow.isReviewing)
+    #expect(lookup.text == source)
 
-    await flow.confirm(lookup: lookup, selectedText: "actors", selectedSentence: "Swift actors protect mutable state.")
-    #expect(explainer.requests == [LookupRequest(text: "actors", selectedSentence: "Swift actors protect mutable state.")])
-}
-
-@Test @MainActor
-func ocrReviewRejectsSentenceThatDoesNotContainPhrase() async {
-    let explainer = ContextRecordingExplainer()
-    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
-    let flow = OCRLookupFlow(recognizer: ContextRecognizer(text: "Swift actors protect mutable state.\nAnother line."))
-    await flow.start(lookup: lookup, hidePanel: {}, showPanel: {})
-
-    await flow.confirm(lookup: lookup, selectedText: "actors", selectedSentence: "Another line.")
-    #expect(flow.isReviewing)
-    #expect(flow.errorMessage != nil)
-    #expect(explainer.requests.isEmpty)
+    await lookup.submit(selectedPhrase: "actors")
+    #expect(lookup.text == "actors")
+    #expect(explainer.requests == [LookupRequest(text: "actors", context: .softwareDevelopment)])
 }
 
 @MainActor private struct ContextTextReader: SelectedTextReading {
@@ -65,7 +46,10 @@ func ocrReviewRejectsSentenceThatDoesNotContainPhrase() async {
 
 @MainActor private struct ContextRecognizer: RegionTextRecognizing {
     let text: String
-    func recognizeSelectedRegion() async throws -> OCRRecognition? { OCRRecognition(text: text, confidence: 0.95) }
+    func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
+        await onSelection()
+        return OCRRecognition(text: text, confidence: 0.95)
+    }
 }
 
 @MainActor private final class ContextRecordingExplainer: LocalExplaining {

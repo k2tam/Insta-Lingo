@@ -4,12 +4,10 @@ import Observation
 public struct LookupRequest: Equatable, Sendable {
     public let text: String
     public let context: ProfessionalContext
-    public let selectedSentence: String?
 
-    public init(text: String, context: ProfessionalContext = .general, selectedSentence: String? = nil) {
+    public init(text: String, context: ProfessionalContext = .general) {
         self.text = text
         self.context = context
-        self.selectedSentence = selectedSentence
     }
 }
 
@@ -66,145 +64,186 @@ public protocol LocalTranslating {
     func translate(_ request: LookupRequest, to target: TargetLanguage) async throws -> LookupResult
 }
 
+/// Marks failures caused by an unavailable Apple on-device capability.
+public protocol LocalLookupUnavailable: Error {}
+
 public enum LookupPhase: Equatable, Sendable {
     case idle
     case loading
-    case fallbackPrompt(String)
     case result
     case error(String)
 }
 
 @MainActor @Observable
 public final class LookupCoordinator {
-    public var text = ""
-    /// Selecting Gemini applies to the next submission only.
-    public var selectedSource: LookupSource = .local
+    public var text = "" {
+        didSet {
+            guard text != oldValue else { return }
+            requestGeneration += 1
+            phase = .idle
+            result = nil
+            completedLookup = nil
+            vietnameseResult = nil
+            vietnamesePhase = .idle
+        }
+    }
+    /// Groq is the default when configured; the user's selection remains active until changed.
+    public var selectedSource: LookupSource
     public let contextCatalog: ProfessionalContextCatalog
     public var selectedLanguage: TargetLanguage {
-        didSet { preferences.set(selectedLanguage.code, forKey: Self.languageKey) }
+        didSet {
+            guard selectedLanguage == .vietnamese || selectedLanguage == .simpleEnglish else {
+                selectedLanguage = .vietnamese
+                return
+            }
+            preferences.set(selectedLanguage.code, forKey: Self.languageKey)
+        }
     }
     public private(set) var availableLanguages: [TargetLanguage] = [.vietnamese, .simpleEnglish]
     public private(set) var phase: LookupPhase = .idle
     public private(set) var result: LookupResult?
     public private(set) var completedLookup: CompletedLookup?
+    public private(set) var vietnameseResult: LookupResult?
+    public private(set) var vietnamesePhase: LookupPhase = .idle
 
     @ObservationIgnored private let explainer: any LocalExplaining
     @ObservationIgnored private let translator: (any LocalTranslating)?
-    @ObservationIgnored private let gemini: (any GeminiLookupProviding)?
-    @ObservationIgnored private let geminiConfiguration: GeminiConfiguration?
-    @ObservationIgnored private let fallbackSettings: GeminiFallbackSettings?
+    @ObservationIgnored private let groq: (any GroqLookupProviding)?
+    @ObservationIgnored private let groqConfiguration: GroqConfiguration?
     @ObservationIgnored private let history: LookupHistory?
     @ObservationIgnored private let preferences: UserDefaults
-    @ObservationIgnored private var pendingFallback: PendingFallback?
+    @ObservationIgnored private var requestGeneration = 0
+    @ObservationIgnored private var completedSource: LookupSource?
     private static let languageKey = "lookup.targetLanguage"
 
-    public init(explainer: any LocalExplaining, translator: (any LocalTranslating)? = nil, gemini: (any GeminiLookupProviding)? = nil, geminiConfiguration: GeminiConfiguration? = nil, fallbackSettings: GeminiFallbackSettings? = nil, history: LookupHistory? = nil, preferences: UserDefaults = .standard, contextCatalog: ProfessionalContextCatalog? = nil) {
+    public init(explainer: any LocalExplaining, translator: (any LocalTranslating)? = nil, groq: (any GroqLookupProviding)? = nil, groqConfiguration: GroqConfiguration? = nil, history: LookupHistory? = nil, preferences: UserDefaults = .standard, contextCatalog: ProfessionalContextCatalog? = nil) {
         self.explainer = explainer
         self.translator = translator
-        self.gemini = gemini
-        self.geminiConfiguration = geminiConfiguration
-        self.fallbackSettings = fallbackSettings
+        self.groq = groq
+        self.groqConfiguration = groqConfiguration
         self.history = history
         self.preferences = preferences
         self.contextCatalog = contextCatalog ?? ProfessionalContextCatalog(defaults: preferences)
+        selectedSource = groq == nil ? .local : .groq
         let saved = preferences.string(forKey: Self.languageKey)
-        selectedLanguage = saved.map(TargetLanguage.init(code:)) ?? .vietnamese
-        if selectedLanguage != .vietnamese && selectedLanguage != .simpleEnglish {
-            availableLanguages.append(selectedLanguage)
-        }
+        selectedLanguage = saved == TargetLanguage.simpleEnglish.code ? .simpleEnglish : .vietnamese
     }
 
     public func loadAvailableLanguages() async {
-        guard let translator else { return }
-        let supported = await translator.supportedTargetLanguages()
-        let options = Set(supported + [.simpleEnglish, .vietnamese, selectedLanguage])
-        availableLanguages = options.sorted {
-            if $0 == .vietnamese { return true }
-            if $1 == .vietnamese { return false }
-            if $0 == .simpleEnglish { return true }
-            if $1 == .simpleEnglish { return false }
-            return $0.displayName.localizedStandardCompare($1.displayName) == .orderedAscending
-        }
+        availableLanguages = [.vietnamese, .simpleEnglish]
     }
 
-    public func submit(selectedSentence: String? = nil) async {
+    public func submit() async {
         guard phase != .loading else { return }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
             phase = .error("Enter an English word or short phrase to look up.")
             return
         }
+        guard Self.isShortPhrase(trimmed) else {
+            phase = .error("Select an English word or short phrase in the text before looking it up.")
+            return
+        }
         phase = .loading
+        requestGeneration += 1
+        let generation = requestGeneration
         result = nil
         completedLookup = nil
-        pendingFallback = nil
+        vietnameseResult = nil
+        vietnamesePhase = .idle
+        completedSource = nil
         let source = selectedSource
-        defer { selectedSource = .local }
-        let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext, selectedSentence: selectedSentence)
+        let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext)
         let target = selectedLanguage
         do {
-            if source == .gemini {
-                guard let gemini, let geminiConfiguration else {
-                    throw GeminiConfigurationError.disabled
-                }
-                let key = try geminiConfiguration.keyForSelectedLookup()
-                result = try await gemini.lookup(request, to: target, apiKey: key)
+            let resolved: LookupResult
+            if source == .groq {
+                guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
+                let apiKey = try groqConfiguration.keyForLookup()
+                resolved = try await groq.lookup(request, to: target, apiKey: apiKey)
             } else if target.isSimpleEnglish {
-                result = try await explainer.explain(request)
+                resolved = try await explainer.explain(request)
             } else if let translator {
-                result = try await translator.translate(request, to: target)
+                resolved = try await translator.translate(request, to: target)
             } else {
                 throw LookupError.translationUnavailable
             }
+            guard generation == requestGeneration else { return }
+            result = resolved
             phase = .result
-            if let result {
-                completedLookup = CompletedLookup(request: request, targetLanguage: target, result: result)
-                record(request: request, target: target, result: result)
-            }
+            completedLookup = CompletedLookup(request: request, targetLanguage: target, result: resolved)
+            completedSource = source
+            record(request: request, target: target, result: resolved)
         } catch {
-            if source == .local, error is LocalLookupUnavailable,
-               let gemini, let geminiConfiguration, let fallbackSettings,
-               geminiConfiguration.isEnabled, geminiConfiguration.hasAPIKey,
-               (try? geminiConfiguration.keyForSelectedLookup()) != nil {
-                switch fallbackSettings.choice {
-                case .ask:
-                    pendingFallback = PendingFallback(request: request, target: target, reason: error.localizedDescription)
-                    phase = .fallbackPrompt(error.localizedDescription)
-                case .allow:
-                    await runFallback(request: request, target: target, gemini: gemini, configuration: geminiConfiguration)
-                case .decline:
-                    phase = .error(error.localizedDescription)
-                }
-            } else {
-                phase = .error(error.localizedDescription)
-            }
-        }
-    }
-
-    /// Called only after the user responds to the visible Local-unavailable offer.
-    public func resolveFallback(_ choice: GeminiFallbackChoice) async {
-        guard choice != .ask, let pendingFallback, let fallbackSettings else { return }
-        self.pendingFallback = nil
-        fallbackSettings.choice = choice
-        guard choice == .allow, let gemini, let geminiConfiguration else {
-            phase = .error(pendingFallback.reason)
-            return
-        }
-        await runFallback(request: pendingFallback.request, target: pendingFallback.target, gemini: gemini, configuration: geminiConfiguration)
-    }
-
-    private func runFallback(request: LookupRequest, target: TargetLanguage, gemini: any GeminiLookupProviding, configuration: GeminiConfiguration) async {
-        phase = .loading
-        do {
-            let key = try configuration.keyForSelectedLookup()
-            let value = try await gemini.lookup(request, to: target, apiKey: key)
-            result = value
-            phase = .result
-            completedLookup = CompletedLookup(request: request, targetLanguage: target, result: value)
-            record(request: request, target: target, result: value)
-        } catch {
+            guard generation == requestGeneration else { return }
             phase = .error(error.localizedDescription)
         }
+    }
+
+    /// Loads a Vietnamese companion result only when the English result is expanded.
+    public func loadVietnameseResult() async {
+        guard let completedLookup, completedLookup.targetLanguage == .simpleEnglish,
+              let source = completedSource,
+              vietnamesePhase != .loading, vietnamesePhase != .result else { return }
+        let generation = requestGeneration
+        vietnamesePhase = .loading
+        do {
+            let resolved: LookupResult
+            if source == .groq {
+                guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
+                let apiKey = try groqConfiguration.keyForLookup()
+                resolved = try await groq.lookup(completedLookup.request, to: .vietnamese, apiKey: apiKey)
+            } else if let translator {
+                resolved = try await translator.translate(completedLookup.request, to: .vietnamese)
+            } else {
+                throw LookupError.translationUnavailable
+            }
+            guard generation == requestGeneration else { return }
+            vietnameseResult = resolved
+            vietnamesePhase = .result
+        } catch {
+            guard generation == requestGeneration else { return }
+            vietnamesePhase = .error(error.localizedDescription)
+        }
+    }
+
+    public static func isShortPhrase(_ text: String) -> Bool {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.count <= 32,
+              !trimmed.contains(where: \.isNewline) else { return false }
+        return (1...4).contains(trimmed.split(whereSeparator: \.isWhitespace).count)
+    }
+
+    public static func isClearShortPhrase(_ text: String) -> Bool {
+        guard isShortPhrase(text) else { return false }
+        return text.split(whereSeparator: \.isWhitespace).allSatisfy { word in
+            word.unicodeScalars.allSatisfy {
+                CharacterSet.letters.contains($0) || $0 == "'" || $0 == "-"
+            }
+        }
+    }
+
+    public func submit(selectedPhrase: String) async {
+        guard let choice = SelectedLookupText(source: text, phrase: selectedPhrase),
+              Self.isShortPhrase(choice.phrase) else {
+            phase = .error("Select an English word or short phrase in the text before looking it up.")
+            return
+        }
+        text = choice.phrase
+        await submit()
+    }
+
+    /// Repeats a completed lookup after its professional context changes.
+    public func refreshForSelectedContext() async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if phase == .loading {
+            requestGeneration += 1
+            phase = .idle
+            await submit()
+            return
+        }
+        guard completedLookup?.request.text == trimmed else { return }
+        await submit()
     }
 
     private func record(request: LookupRequest, target: TargetLanguage, result: LookupResult) {
@@ -213,16 +252,16 @@ public final class LookupCoordinator {
     }
 }
 
-private struct PendingFallback {
-    let request: LookupRequest
-    let target: TargetLanguage
-    let reason: String
-}
-
-private enum LookupError: LocalizedError, LocalLookupUnavailable {
+private enum LookupError: LocalizedError {
     case translationUnavailable
+    case groqUnavailable
 
     var errorDescription: String? {
-        "Local translation is unavailable on this Mac. Your lookup was not sent to another provider."
+        switch self {
+        case .translationUnavailable:
+            "Local translation is unavailable on this Mac. Your lookup was not sent to another provider."
+        case .groqUnavailable:
+            "Groq is not configured for this app."
+        }
     }
 }

@@ -27,10 +27,11 @@ func invalidSavedLanguageFallsBackToVietnamese() {
 func localizedMessagesCoverCurrentLookupAndPermissionFailures() {
     let vietnamese = UIStrings(language: .vietnamese)
     let english = UIStrings(language: .english)
-    let permission = "Screen Recording permission is needed to read the region you select. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then try again."
-    #expect(vietnamese.errorMessage(permission).contains("Ghi màn hình"))
+    let permission = "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
+    #expect(vietnamese.errorMessage(permission).contains("thoát hẳn"))
     #expect(english.errorMessage(permission) == permission)
     #expect(vietnamese.errorMessage("Enter an English word or short phrase to look up.") == "Nhập từ hoặc cụm tiếng Anh cần tra.")
+    #expect(vietnamese.errorMessage("Add a Groq API key in settings before using Groq.").contains("Groq API"))
     #expect(vietnamese.errorMessage("English to Japanese is not supported by Apple Translation on this Mac. Your lookup was not sent to another provider.").contains("Japanese"))
     #expect(vietnamese.resultDetail("Translated on this Mac from English to Vietnamese.") == "Đã dịch trên máy từ tiếng Anh sang Vietnamese.")
     #expect(vietnamese.contextName(id: "general", customName: "General") == "Thông thường")

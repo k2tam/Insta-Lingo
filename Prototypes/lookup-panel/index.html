@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROTOTYPE — TransAtGlance lookup panel</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --bg: #17181a;
+      --panel: rgba(43, 44, 47, .96);
+      --surface: #35363a;
+      --surface-2: #2b2c30;
+      --line: rgba(255,255,255,.10);
+      --text: #f5f5f7;
+      --muted: #aaaab0;
+      --blue: #65aaf7;
+      --blue-solid: #0a84ff;
+      --shadow: 0 22px 80px rgba(0,0,0,.52), 0 0 0 1px rgba(255,255,255,.22);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 10%, #2b3441 0, transparent 35%),
+        radial-gradient(circle at 85% 85%, #202936 0, transparent 38%),
+        var(--bg);
+      color: var(--text);
+      display: grid;
+      place-items: center;
+      padding: 44px 24px 110px;
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .prototype-note {
+      position: fixed;
+      top: 18px;
+      left: 20px;
+      color: #b7b7bd;
+      font-size: 12px;
+      letter-spacing: .02em;
+    }
+    .panel {
+      width: min(760px, calc(100vw - 48px));
+      min-height: 550px;
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,.18);
+      overflow: hidden;
+      backdrop-filter: blur(32px) saturate(1.2);
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 22px 14px;
+    }
+    .brand { font-size: 18px; font-weight: 700; letter-spacing: -.01em; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-button, .menu-button {
+      width: 34px;
+      height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.07);
+      cursor: pointer;
+    }
+    .menu-wrap { position: relative; }
+    .popover {
+      position: absolute;
+      z-index: 10;
+      top: 38px;
+      right: 0;
+      width: 220px;
+      padding: 6px;
+      background: #34353a;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 10px;
+      box-shadow: 0 16px 42px rgba(0,0,0,.5);
+      display: none;
+    }
+    .popover.open { display: grid; }
+    .popover button {
+      text-align: left;
+      padding: 8px 10px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      cursor: pointer;
+    }
+    .popover button:hover { background: var(--blue-solid); }
+    .popover hr { width: 100%; border: 0; border-top: 1px solid var(--line); margin: 4px 0; }
+    .query-row { display: flex; gap: 10px; }
+    .query {
+      min-width: 0;
+      flex: 1;
+      height: 42px;
+      padding: 0 13px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.18);
+      background: #1f2023;
+      color: var(--text);
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,.2);
+    }
+    .query:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(10,132,255,.32); }
+    .primary {
+      min-width: 105px;
+      height: 42px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--blue-solid);
+      font-weight: 650;
+      cursor: pointer;
+    }
+    .select {
+      height: 32px;
+      padding: 0 30px 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--text);
+      background: var(--surface);
+    }
+    .eyebrow {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255,255,255,.055);
+      color: #d9d9de;
+      padding: 7px 11px;
+      cursor: pointer;
+    }
+    .chip.active {
+      background: rgba(10,132,255,.20);
+      border-color: rgba(101,170,247,.75);
+      color: white;
+    }
+    .result-card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(22,23,26,.58);
+      padding: 22px;
+    }
+    .result-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .word { font-size: 14px; font-weight: 650; color: #d5d5da; }
+    .meaning { font-size: 23px; line-height: 1.38; letter-spacing: -.015em; margin: 14px 0 10px; }
+    .example {
+      color: #c2c2c8;
+      font-size: 15px;
+      line-height: 1.5;
+      padding-left: 13px;
+      border-left: 2px solid rgba(101,170,247,.75);
+      margin: 0;
+    }
+    .result-actions { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+    .ghost {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,255,255,.06);
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+    .detail-link { margin-left: auto; color: #b9dafe; background: none; border: 0; cursor: pointer; }
+    .state {
+      color: #898991;
+      font: 11px ui-monospace, SFMono-Regular, Menlo, monospace;
+      border-top: 1px solid var(--line);
+      padding: 9px 22px;
+      background: rgba(0,0,0,.13);
+    }
+
+    /* A — wide, one-column focus */
+    .a-main { padding: 0 22px 18px; display: grid; gap: 15px; }
+    .context-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .a-main .result-card { min-height: 292px; }
+
+    /* B — split context and meaning */
+    .b-body { display: grid; grid-template-columns: 210px minmax(0, 1fr); border-top: 1px solid var(--line); }
+    .sidebar { padding: 19px 14px; background: rgba(0,0,0,.13); border-right: 1px solid var(--line); }
+    .context-list { display: grid; gap: 6px; margin-top: 10px; }
+    .context-list button {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      width: 100%;
+      padding: 9px 10px;
+      border: 0;
+      border-radius: 8px;
+      text-align: left;
+      background: transparent;
+      cursor: pointer;
+    }
+    .context-list button.active { background: rgba(10,132,255,.24); }
+    .b-content { min-width: 0; padding: 18px 20px; display: grid; gap: 14px; }
+    .b-content .primary { min-width: 92px; }
+    .b-content .result-card { min-height: 335px; }
+    .tiny-note { color: var(--muted); font-size: 12px; line-height: 1.4; margin-top: 18px; }
+
+    /* C — context-first */
+    .c-context {
+      padding: 20px 22px;
+      background: linear-gradient(135deg, rgba(10,132,255,.18), rgba(115,91,224,.10));
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .c-context-title { font-size: 20px; font-weight: 680; margin: 5px 0 14px; }
+    .c-main { padding: 18px 22px; display: grid; gap: 15px; }
+    .c-main .result-card { border: 0; background: transparent; padding: 8px 1px 12px; min-height: 265px; }
+    .c-main .meaning { font-size: 25px; }
+    .c-meta { display: flex; gap: 8px; align-items: center; }
+    .meta-pill { padding: 5px 8px; border-radius: 6px; background: rgba(255,255,255,.08); color: #c6c6cc; font-size: 12px; }
+
+    .switcher {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      border-radius: 999px;
+      background: #f4f4f6;
+      color: #171719;
+      box-shadow: 0 12px 36px rgba(0,0,0,.48);
+      z-index: 20;
+    }
+    .switcher button {
+      width: 34px;
+      height: 30px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: #171719;
+      cursor: pointer;
+    }
+    .switcher button:hover { background: #dedee3; }
+    .variant-label { min-width: 210px; text-align: center; font-size: 13px; font-weight: 700; }
+    @media (max-width: 520px) {
+      .b-body { grid-template-columns: 1fr; }
+      .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
+      .context-list { grid-template-columns: repeat(3, 1fr); }
+      .context-list button { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Three wide-panel variants, switchable via ?variant=A|B|C. Throwaway UI prototype. -->
+  <div class="prototype-note">PROTOTYPE · không phải giao diện production</div>
+
+  <section class="panel view" data-view="A">
+    <header class="topbar">
+      <div class="brand">TransAtGlance</div>
+      <div class="header-actions">
+        <select class="select language" aria-label="Ngôn ngữ kết quả"><option value="vi">Tiếng Việt</option><option value="en">Simple English</option></select>
+        <button class="icon-button" data-action="settings" aria-label="Mở cài đặt">⚙︎</button>
+        <div class="menu-wrap">
+          <button class="menu-button" data-menu aria-label="Tác vụ khác">•••</button>
+          <div class="popover"><button>Tra chữ đang bôi đen</button><button>Chọn vùng màn hình</button><hr><button>Lịch sử tra</button><button>Mục yêu thích</button><hr><button>Thoát ứng dụng</button></div>
+        </div>
+      </div>
+    </header>
+    <main class="a-main">
+      <div class="query-row"><input class="query" value="cat" aria-label="Nội dung cần tra"><button class="primary">Tra nghĩa</button></div>
+      <div class="context-row">
+        <div><div class="eyebrow">Ngữ cảnh chuyên môn</div><div class="chips" style="margin-top:8px"><button class="chip active" data-context="general">Thông thường</button><button class="chip" data-context="software-development">Phát triển phần mềm</button><button class="chip" data-context="swift-ios">Swift / iOS</button></div></div>
+      </div>
+      <article class="result-card">
+        <div class="result-head"><span class="word">cat · danh từ</span><span class="meta-pill">Groq</span></div>
+        <p class="meaning">Con vật nuôi nhỏ thuộc họ mèo, thường được nuôi trong nhà để làm bạn.</p>
+        <p class="example">Con mèo đang ngủ yên trên ghế sofa cạnh cửa sổ.</p>
+        <div class="result-actions"><button class="ghost">☆ Đánh dấu</button><button class="ghost">Sao chép</button><button class="detail-link">Xem giải thích chi tiết ›</button></div>
+      </article>
+    </main>
+    <div class="state">state: result · context=general · target=vi · source=groq</div>
+  </section>
+
+  <section class="panel view" data-view="B">
+    <header class="topbar">
+      <div class="brand">TransAtGlance</div>
+      <div class="header-actions">
+        <button class="icon-button" data-action="settings" aria-label="Mở cài đặt">⚙︎</button>
+        <div class="menu-wrap"><button class="menu-button" data-menu aria-label="Tác vụ khác">•••</button><div class="popover"><button>Tra chữ đang bôi đen</button><button>Chọn vùng màn hình</button><hr><button>Lịch sử tra</button><button>Mục yêu thích</button><hr><button>Thoát ứng dụng</button></div></div>
+      </div>
+    </header>
+    <div class="b-body">
+      <aside class="sidebar">
+        <div class="eyebrow">Chọn ngữ cảnh</div>
+        <div class="context-list"><button class="active" data-context="general">◉ Thông thường</button><button data-context="software-development">⌘ Phần mềm</button><button data-context="swift-ios">◇ Swift / iOS</button></div>
+        <p class="tiny-note">Ngữ cảnh giúp chọn đúng nghĩa của từ. Lựa chọn này được giữ cho lượt tra tiếp theo.</p>
+      </aside>
+      <main class="b-content">
+        <div class="query-row"><input class="query" value="cat" aria-label="Nội dung cần tra"><select class="select language" aria-label="Ngôn ngữ kết quả"><option value="vi">VI</option><option value="en">EN</option></select><button class="primary">Tra nghĩa</button></div>
+        <article class="result-card">
+          <div class="result-head"><span class="word">cat</span><span class="meta-pill">Thông thường · Tiếng Việt</span></div>
+          <p class="meaning">Con vật nuôi nhỏ thuộc họ mèo, thường được nuôi trong nhà để làm bạn.</p>
+          <p class="example">Con mèo đang ngủ yên trên ghế sofa cạnh cửa sổ.</p>
+          <div class="result-actions"><button class="ghost">☆ Đánh dấu</button><button class="ghost">Sao chép</button><button class="detail-link">Xem thêm ›</button></div>
+        </article>
+      </main>
+    </div>
+    <div class="state">state: result · context=general · target=vi · layout=split</div>
+  </section>
+
+  <section class="panel view" data-view="C">
+    <header class="topbar">
+      <div class="brand">TransAtGlance</div>
+      <div class="header-actions"><button class="icon-button" data-action="settings" aria-label="Mở cài đặt">⚙︎</button><div class="menu-wrap"><button class="menu-button" data-menu aria-label="Tác vụ khác">•••</button><div class="popover"><button>Tra chữ đang bôi đen</button><button>Chọn vùng màn hình</button><hr><button>Lịch sử tra</button><button>Mục yêu thích</button><hr><button>Thoát ứng dụng</button></div></div></div>
+    </header>
+    <section class="c-context">
+      <div class="eyebrow">Lượt tra này thuộc ngữ cảnh nào?</div>
+      <div class="c-context-title">Chọn nghĩa đúng trước khi tra</div>
+      <div class="chips"><button class="chip active" data-context="general">Thông thường</button><button class="chip" data-context="software-development">Phát triển phần mềm</button><button class="chip" data-context="swift-ios">Swift / iOS</button><button class="chip" data-context="custom">＋ Ngữ cảnh khác</button></div>
+    </section>
+    <main class="c-main">
+      <div class="query-row"><input class="query" value="cat" aria-label="Nội dung cần tra"><select class="select language" aria-label="Ngôn ngữ kết quả"><option value="vi">Tiếng Việt</option><option value="en">Simple English</option></select><button class="primary">Tra nghĩa</button></div>
+      <article class="result-card">
+        <div class="c-meta"><span class="word">cat</span><span class="meta-pill">danh từ</span><span class="meta-pill">Groq</span></div>
+        <p class="meaning">Con vật nuôi nhỏ thuộc họ mèo, thường được nuôi trong nhà để làm bạn.</p>
+        <p class="example">Con mèo đang ngủ yên trên ghế sofa cạnh cửa sổ.</p>
+        <div class="result-actions"><button class="ghost">☆ Đánh dấu</button><button class="ghost">Sao chép</button><button class="detail-link">Giải thích chi tiết ›</button></div>
+      </article>
+    </main>
+    <div class="state">state: result · context=general · target=vi · emphasis=context-first</div>
+  </section>
+
+  <nav class="switcher" aria-label="Chọn biến thể prototype">
+    <button id="previous" aria-label="Biến thể trước">←</button>
+    <div class="variant-label" id="variant-label"></div>
+    <button id="next" aria-label="Biến thể sau">→</button>
+  </nav>
+
+  <script>
+    const variants = [
+      { key: 'A', name: 'Rộng · tập trung kết quả' },
+      { key: 'B', name: 'Hai cột · context cố định' },
+      { key: 'C', name: 'Context trước · kết quả thoáng' }
+    ];
+    const prototypeState = { phase: 'result', query: 'cat', context: 'general', target: 'vi', source: 'groq' };
+    let current = new URLSearchParams(location.search).get('variant')?.toUpperCase();
+    if (!variants.some(v => v.key === current)) current = 'A';
+
+    function render() {
+      document.querySelectorAll('[data-view]').forEach(view => view.classList.toggle('active', view.dataset.view === current));
+      const item = variants.find(v => v.key === current);
+      document.querySelector('#variant-label').textContent = `${item.key} — ${item.name}`;
+      const url = new URL(location.href);
+      url.searchParams.set('variant', current);
+      history.replaceState({}, '', url);
+      renderState();
+    }
+    function renderState() {
+      document.querySelectorAll('.state').forEach(label => {
+        label.textContent = `state: ${prototypeState.phase} · query=${prototypeState.query} · context=${prototypeState.context} · target=${prototypeState.target} · source=${prototypeState.source}`;
+      });
+    }
+    function cycle(direction) {
+      const index = variants.findIndex(v => v.key === current);
+      current = variants[(index + direction + variants.length) % variants.length].key;
+      render();
+    }
+    document.querySelector('#previous').addEventListener('click', () => cycle(-1));
+    document.querySelector('#next').addEventListener('click', () => cycle(1));
+    document.addEventListener('keydown', event => {
+      const tag = document.activeElement?.tagName;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) || document.activeElement?.isContentEditable) return;
+      if (event.key === 'ArrowLeft') cycle(-1);
+      if (event.key === 'ArrowRight') cycle(1);
+    });
+    document.querySelectorAll('[data-menu]').forEach(button => button.addEventListener('click', event => {
+      event.stopPropagation();
+      const target = button.nextElementSibling;
+      document.querySelectorAll('.popover').forEach(menu => { if (menu !== target) menu.classList.remove('open'); });
+      target.classList.toggle('open');
+    }));
+    document.addEventListener('click', () => document.querySelectorAll('.popover').forEach(menu => menu.classList.remove('open')));
+    document.querySelectorAll('.chips, .context-list').forEach(group => group.addEventListener('click', event => {
+      const button = event.target.closest('button');
+      if (!button) return;
+      group.querySelectorAll('button').forEach(item => item.classList.remove('active'));
+      button.classList.add('active');
+      prototypeState.context = button.dataset.context ?? 'general';
+      renderState();
+    }));
+    document.querySelectorAll('.language').forEach(select => select.addEventListener('change', event => {
+      prototypeState.target = event.target.value;
+      document.querySelectorAll('.language').forEach(other => { other.value = prototypeState.target; });
+      renderState();
+    }));
+    document.querySelectorAll('.query').forEach(input => input.addEventListener('input', event => {
+      prototypeState.query = event.target.value;
+      renderState();
+    }));
+    render();
+  </script>
+</body>
+</html>

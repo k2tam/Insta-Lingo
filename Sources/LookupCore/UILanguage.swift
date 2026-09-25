@@ -43,18 +43,37 @@ public struct UIStrings: Sendable {
     public var vietnamese: String { "Tiếng Việt" }
     public var english: String { "English" }
     public var inputPlaceholder: String { choose("Từ hoặc cụm tiếng Anh", "English word or short phrase") }
+    public var reviewCapturedText: String { choose("Kiểm tra chữ trong ô; với đoạn dài, bôi đen từ hoặc cụm cần tra rồi bấm Tra nghĩa.", "Review the text in the field; for a longer passage, select the word or phrase to look up, then press Look up.") }
     public var inputAccessibility: String { choose("Từ hoặc cụm cần tra", "Word or short phrase to look up") }
     public var resultLanguage: String { choose("Ngôn ngữ kết quả", "Result language") }
     public var simpleEnglish: String { choose("Tiếng Anh đơn giản", "Simple English") }
-    public var local: String { choose("Trên máy", "Local") }
+    public var local: String { choose("Apple trên máy", "Apple on-device") }
     public var lookup: String { choose("Tra nghĩa", "Look up") }
     public var historyTitle: String { choose("Lịch sử tra", "Lookup history") }
+    public var quitApp: String { choose("Thoát ứng dụng", "Quit") }
     public var idle: String { choose("Nhập từ hoặc cụm ngắn để xem nghĩa.", "Type a word or short phrase to see its meaning.") }
     public var loading: String { choose("Đang tra trên máy…", "Looking up on this Mac…") }
     public var moreDetail: String { choose("Xem thêm", "More detail") }
+    public var vietnameseExplanation: String { choose("Xem giải nghĩa tiếng Việt", "Show Vietnamese explanation") }
+    public var loadingVietnamese: String { choose("Đang tra giải nghĩa tiếng Việt…", "Loading Vietnamese explanation…") }
+    public var retryVietnamese: String { choose("Thử lại", "Retry") }
+    public var moreActions: String { choose("Tác vụ khác", "More actions") }
     public var storageUnavailable: String { choose("Không thể lưu dữ liệu trên máy. Hãy kiểm tra dung lượng và quyền truy cập rồi thử lại.", "Could not save data on this Mac. Check storage space and permissions, then try again.") }
     public var newContext: String { choose("Ngữ cảnh mới…", "New context…") }
+    public var professionalContext: String { choose("Ngữ cảnh chuyên môn", "Professional context") }
     public var newProfessionalContext: String { choose("Ngữ cảnh chuyên môn mới", "New professional context") }
+    public var editProfessionalContext: String { choose("Sửa ngữ cảnh chuyên môn", "Edit professional context") }
+    public var contextSettings: String { choose("Ngữ cảnh", "Contexts") }
+    public var availableContexts: String { choose("Ngữ cảnh hiện có", "Available contexts") }
+    public var showInLookupWindow: String { choose("Hiện trong cửa sổ tra nghĩa", "Show in lookup window") }
+    public var contextVisibilityHint: String { choose("Chọn ngữ cảnh sẽ hiện trong cửa sổ tra nghĩa. Luôn cần ít nhất một ngữ cảnh.", "Choose which contexts appear in the lookup window. At least one must remain visible.") }
+    public var selectedContext: String { choose("Dùng khi tra", "Use for lookups") }
+    public var contextSelectionHint: String { choose("Ngữ cảnh đã chọn được dùng cho các lượt tra tiếp theo.", "The selected context is used for future lookups.") }
+    public var customContexts: String { choose("Ngữ cảnh tự tạo", "Custom contexts") }
+    public var editContext: String { choose("Sửa", "Edit") }
+    public var deleteContext: String { choose("Xóa", "Delete") }
+    public var deleteContextConfirmation: String { choose("Xóa ngữ cảnh này?", "Delete this context?") }
+    public var saveContext: String { choose("Lưu", "Save") }
     public var contextName: String { choose("Tên", "Name") }
     public var contextNameAccessibility: String { choose("Tên ngữ cảnh", "Context name") }
     public var contextDescription: String { choose("Mô tả ngắn", "Short description") }
@@ -68,10 +87,19 @@ public struct UIStrings: Sendable {
 
     public func contextName(id: String, customName: String) -> String {
         switch id {
-        case "general": generalContext
-        case "software-development": softwareContext
-        case "swift-ios": swiftContext
+        case "general" where customName == ProfessionalContext.general.name: generalContext
+        case "software-development" where customName == ProfessionalContext.softwareDevelopment.name: softwareContext
+        case "swift-ios" where customName == ProfessionalContext.swiftIOS.name: swiftContext
         default: customName
+        }
+    }
+
+    public func contextDescription(id: String, customDescription: String) -> String {
+        switch id {
+        case "general" where customDescription == ProfessionalContext.general.description: choose("Cách dùng tiếng Anh hằng ngày, không thuộc lĩnh vực chuyên môn.", "Everyday English usage without a specialized field.")
+        case "software-development" where customDescription == ProfessionalContext.softwareDevelopment.description: choose("Thuật ngữ thiết kế phần mềm, lập trình và kỹ thuật.", "Software design, programming, and engineering terminology.")
+        case "swift-ios" where customDescription == ProfessionalContext.swiftIOS.description: choose("Thuật ngữ ngôn ngữ Swift và phát triển ứng dụng Apple.", "Swift language and Apple app development terminology.")
+        default: customDescription
         }
     }
 
@@ -87,38 +115,37 @@ public struct UIStrings: Sendable {
     public var selectRegion: String { choose("Chọn vùng màn hình", "Select screen region") }
     public var selectRegionAccessibility: String { choose("Chọn vùng màn hình để nhận diện chữ", "Select screen region for text recognition") }
     public var selectingRegionHint: String { choose("Kéo khoanh chữ, hoặc nhấn Escape để hủy.", "Drag around the text, or press Escape to cancel.") }
-    public var reviewingOCR: String { choose("Kiểm tra chữ nhận diện", "Review recognized text") }
-    public var reviewingSelection: String { choose("Chọn nội dung cần tra", "Choose lookup text") }
-    public var lookupPhrase: String { choose("Từ hoặc cụm cần tra", "Word or phrase to look up") }
-    public var optionalSelectedSentence: String { choose("Câu ngữ cảnh đã chọn (không bắt buộc)", "Selected context sentence (optional)") }
-    public var selectedSentenceHint: String { choose("Câu ngữ cảnh phải nằm trong phần chữ đã chọn và chứa từ cần tra.", "The context sentence must come from the selected text and contain the lookup phrase.") }
-    public var useSelectionAsSentence: String { choose("Dùng phần chọn làm câu ngữ cảnh", "Use selection as context sentence") }
-    public var recognizedTextAccessibility: String { choose("Chữ nhận diện; sửa hoặc chọn một từ hay cụm", "Recognized text; edit or select a word or phrase") }
-    public var useRecognizedText: String { choose("Tra chữ nhận diện", "Look up text") }
-    public var useSelectedText: String { choose("Tra phần chữ đã chọn", "Look up selection") }
+    public var recognizingRegion: String { choose("Đang nhận diện chữ trong vùng chọn…", "Recognizing text in the selected region…") }
     public var lookupSelection: String { choose("Tra chữ đang bôi đen", "Look up selected text") }
     public var readingSelection: String { choose("Đang đọc phần chữ đã chọn…", "Reading selected text…") }
     public var accessibilityPermissionNeeded: String { choose("Cần quyền Trợ năng để đọc chữ đã bôi đen. Cấp quyền cho TransAtGlance trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Trợ năng, rồi thử lại.", "Accessibility permission is needed to read selected text. Enable TransAtGlance in System Settings → Privacy & Security → Accessibility, then try again.") }
     public var retrySelection: String { choose("Thử đọc lại", "Retry selection") }
     public var selectionUnavailable: String { choose("Không đọc được chữ đang bôi đen trong ứng dụng trước đó. Bạn có thể chọn vùng màn hình để nhận diện chữ.", "The previous app did not provide selected text. You can select a screen region to recognize it.") }
     public var selectRegionInstead: String { choose("Chọn vùng thay thế", "Select region instead") }
-    public var gemini: String { "Gemini" }
-    public var geminiAPIKey: String { choose("Khóa Gemini API", "Gemini API key") }
-    public var enableGemini: String { choose("Bật Gemini", "Enable Gemini") }
+    public var groq: String { "Groq" }
+    public var modelSettings: String { choose("Model dịch", "Lookup model") }
+    public var groqModel: String { choose("Model", "Model") }
+    public var reasoningEffort: String { choose("Mức suy luận", "Reasoning effort") }
+    public func reasoningEffortName(_ effort: GroqReasoningEffort) -> String {
+        switch effort {
+        case .low: choose("Thấp", "Low")
+        case .medium: choose("Vừa", "Medium")
+        case .high: choose("Cao", "High")
+        }
+    }
+    public var groqAPIKey: String { choose("Khóa Groq API", "Groq API key") }
     public var saveKey: String { choose("Lưu khóa", "Save key") }
+    public var pasteKey: String { choose("Dán khóa từ clipboard", "Paste key from clipboard") }
     public var removeKey: String { choose("Xóa khóa", "Remove key") }
-    public var geminiDisclosure: String { choose("Khi chọn Gemini, nội dung tra, ngôn ngữ kết quả và ngữ cảnh đã chọn sẽ được gửi đến Google.", "When Gemini is selected, the lookup text, result language, and selected context are sent to Google.") }
-    public var lookupSource: String { choose("Nguồn tra nghĩa", "Lookup source") }
     public var apiKeySaved: String { choose("Đã lưu khóa API", "API key saved") }
-    public var geminiLoading: String { choose("Đang tra bằng Gemini…", "Looking up with Gemini…") }
-    public var localFallbackTitle: String { choose("Tra bằng Gemini?", "Look up with Gemini?") }
-    public var localFallbackExplanation: String { choose("Tra trên máy không khả dụng. Nếu tiếp tục, nội dung tra và ngữ cảnh đã chọn sẽ được gửi đến Google. Ứng dụng sẽ nhớ lựa chọn của bạn.", "Local lookup is unavailable. If you continue, the lookup text and selected context will be sent to Google. Your choice will be remembered.") }
-    public var useGeminiFallback: String { choose("Dùng Gemini", "Use Gemini") }
-    public var declineGeminiFallback: String { choose("Không dùng Gemini", "Do not use Gemini") }
-    public var fallbackSetting: String { choose("Khi tra trên máy không khả dụng", "When Local lookup is unavailable") }
-    public var fallbackAsk: String { choose("Hỏi tôi", "Ask me") }
-    public var fallbackAllow: String { choose("Dùng Gemini", "Use Gemini") }
-    public var fallbackDecline: String { choose("Không dùng Gemini", "Do not use Gemini") }
+    public func groqDisclosure(model: GroqModel) -> String {
+        choose(
+            "Khi chọn Groq, nội dung tra, ngôn ngữ kết quả và ngữ cảnh đã chọn sẽ được gửi đến Groq để xử lý bằng \(model.rawValue).",
+            "When Groq is selected, the lookup text, result language, and selected context are sent to Groq for processing by \(model.rawValue)."
+        )
+    }
+    public var lookupSource: String { choose("Nguồn tra nghĩa", "Lookup source") }
+    public var groqLoading: String { choose("Đang tra bằng Groq…", "Looking up with Groq…") }
 
     /// Core and system adapters currently expose localizedDescription as text.
     /// Translate their known messages at the UI boundary; unknown errors remain
@@ -126,6 +153,7 @@ public struct UIStrings: Sendable {
     public func errorMessage(_ message: String) -> String {
         let known: [String: String] = [
             "Enter an English word or short phrase to look up.": "Nhập từ hoặc cụm tiếng Anh cần tra.",
+            "Select an English word or short phrase in the text before looking it up.": "Bôi đen một từ hoặc cụm tiếng Anh trong ô trước khi tra.",
             "Local translation is unavailable on this Mac. Your lookup was not sent to another provider.": "Máy Mac này không thể dịch trên máy. Nội dung tra chưa được gửi đến dịch vụ khác.",
             "This Mac does not support Apple Intelligence.": "Máy Mac này không hỗ trợ Apple Intelligence.",
             "Turn on Apple Intelligence in System Settings to use Local lookup.": "Bật Apple Intelligence trong Cài đặt hệ thống để tra nghĩa trên máy.",
@@ -137,17 +165,16 @@ public struct UIStrings: Sendable {
             "Apple Translation could not translate the explanation and example. Try again.": "Apple Translation không thể dịch giải nghĩa và ví dụ. Hãy thử lại.",
             "Apple Translation did not return a usable explanation and example. Try again.": "Apple Translation không trả về giải nghĩa và ví dụ dùng được. Hãy thử lại.",
             "No readable text was found in the selected region. Try selecting a clearer area.": "Không tìm thấy chữ đọc được trong vùng chọn. Hãy chọn vùng rõ hơn.",
-            "Choose an English word or short phrase from the recognized text.": "Chọn một từ hoặc cụm tiếng Anh trong chữ đã nhận diện.",
-            "Choose a phrase and optional sentence from the selected text. The sentence must contain the phrase.": "Chọn từ hoặc cụm cùng câu ngữ cảnh trong phần chữ đã chọn. Câu phải chứa từ hoặc cụm cần tra.",
-            "Screen Recording permission is needed to read the region you select. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then try again.": "Cần quyền Ghi màn hình để đọc vùng bạn chọn. Bật TransAtGlance trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Ghi màn hình & âm thanh hệ thống, rồi thử lại.",
-            "Enable Gemini in settings before selecting it for a lookup.": "Bật Gemini trong cài đặt trước khi chọn để tra nghĩa.",
-            "Add a Gemini API key in settings before using Gemini.": "Thêm khóa Gemini API trong cài đặt trước khi sử dụng Gemini.",
-            "The Gemini API key could not be accessed in Keychain.": "Không thể truy cập khóa Gemini API trong Chuỗi khóa.",
-            "Gemini rejected this API key. Check it in settings.": "Gemini từ chối khóa API này. Hãy kiểm tra trong cài đặt.",
-            "Could not connect to Gemini. Check your internet connection.": "Không thể kết nối với Gemini. Hãy kiểm tra kết nối Internet.",
-            "Gemini API limit or credit reached. Check your Google AI Studio quota.": "Đã đạt giới hạn hoặc hết tín dụng Gemini API. Hãy kiểm tra hạn mức Google AI Studio.",
-            "Gemini could not complete this lookup. Try again later.": "Gemini không thể hoàn tất lượt tra này. Hãy thử lại sau.",
-            "Gemini returned no usable explanation. Try again.": "Gemini không trả về giải nghĩa dùng được. Hãy thử lại."
+            "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app.": "macOS chưa cho phép chụp vùng màn hình này. Hãy bật TransAtGlance trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Ghi màn hình & âm thanh hệ thống, rồi thoát hẳn và mở lại ứng dụng.",
+            "Could not capture the selected screen. Try again.": "Không thể chụp vùng màn hình đã chọn. Hãy thử lại.",
+            "Groq is not configured for this app.": "Ứng dụng chưa được cấu hình để dùng Groq.",
+            "Add a Groq API key in settings before using Groq.": "Thêm khóa Groq API trong cài đặt trước khi sử dụng Groq.",
+            "The Groq API key could not be accessed in Keychain.": "Không thể truy cập khóa Groq API trong Chuỗi khóa.",
+            "Groq rejected this API key. Check it in settings.": "Groq từ chối khóa API này. Hãy kiểm tra trong cài đặt.",
+            "Could not connect to Groq. Check your internet connection.": "Không thể kết nối với Groq. Hãy kiểm tra kết nối Internet.",
+            "Groq API limit or credit reached. Check your Groq account.": "Đã đạt giới hạn hoặc hết tín dụng Groq API. Hãy kiểm tra tài khoản Groq.",
+            "Groq could not complete this lookup. Try again later.": "Groq không thể hoàn tất lượt tra này. Hãy thử lại sau.",
+            "Groq returned no usable explanation. Try again.": "Groq không trả về giải nghĩa dùng được. Hãy thử lại."
         ]
         guard language == .vietnamese else { return message }
         if let translated = known[message] { return translated }

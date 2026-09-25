@@ -20,33 +20,37 @@ func defaultsToVietnameseAndRoutesToTranslator() async {
 }
 
 @Test @MainActor
-func selectedLanguageSurvivesCoordinatorRecreation() async {
+func onlyVietnameseAndEnglishAreOfferedAndLegacySelectionFallsBack() async {
     let preferences = isolatedPreferences()
     let translator = TestTranslator()
-    let first = LookupCoordinator(explainer: TestExplainer(), translator: translator, preferences: preferences)
-    first.selectedLanguage = TargetLanguage(code: "ja")
-
+    preferences.set("ja", forKey: "lookup.targetLanguage")
     let reopened = LookupCoordinator(explainer: TestExplainer(), translator: translator, preferences: preferences)
-    #expect(reopened.selectedLanguage == TargetLanguage(code: "ja"))
-    reopened.text = "apple"
-    await reopened.submit()
-    #expect(translator.targets == [TargetLanguage(code: "ja")])
+    await reopened.loadAvailableLanguages()
+    #expect(reopened.selectedLanguage == .vietnamese)
+    #expect(reopened.availableLanguages == [.vietnamese, .simpleEnglish])
+    reopened.selectedLanguage = .simpleEnglish
+    #expect(LookupCoordinator(explainer: TestExplainer(), translator: translator, preferences: preferences).selectedLanguage == .simpleEnglish)
 }
 
 @Test @MainActor
-func unsupportedLocalPairShowsErrorWithoutSwitchingProvider() async {
+func englishResultCanLoadVietnameseCompanionOnDemand() async {
     let explainer = TestExplainer()
     let translator = TestTranslator()
-    translator.error = TranslationFailure.unsupported
     let lookup = LookupCoordinator(explainer: explainer, translator: translator, preferences: isolatedPreferences())
-    lookup.selectedLanguage = TargetLanguage(code: "xx")
+    lookup.selectedLanguage = .simpleEnglish
     lookup.text = "apple"
-
     await lookup.submit()
-
-    #expect(lookup.phase == .error("This language pair is unavailable on this Mac."))
-    #expect(lookup.result == nil)
-    #expect(explainer.requests.isEmpty)
+    #expect(translator.requests.isEmpty)
+    await lookup.loadVietnameseResult()
+    #expect(translator.requests == [LookupRequest(text: "apple")])
+    #expect(translator.targets == [.vietnamese])
+    #expect(lookup.vietnameseResult?.meaning == "sự đồng thời")
+    #expect(lookup.result?.meaning == "English meaning")
+    await lookup.loadVietnameseResult()
+    #expect(translator.requests.count == 1)
+    lookup.text = "banana"
+    #expect(lookup.vietnameseResult == nil)
+    #expect(lookup.vietnamesePhase == .idle)
 }
 
 @MainActor
@@ -65,7 +69,7 @@ private final class TestTranslator: LocalTranslating {
     var targets: [TargetLanguage] = []
     var error: Error?
 
-    func supportedTargetLanguages() async -> [TargetLanguage] { [.vietnamese] }
+    func supportedTargetLanguages() async -> [TargetLanguage] { [.vietnamese, TargetLanguage(code: "ja")] }
 
     func translate(_ request: LookupRequest, to target: TargetLanguage) async throws -> LookupResult {
         requests.append(request)

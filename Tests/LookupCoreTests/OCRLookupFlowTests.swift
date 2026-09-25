@@ -15,35 +15,68 @@ func selectedRegionIsReviewedAndOnlyChosenPhraseIsLookedUp() async {
 
     #expect(events == ["hide", "show"])
     #expect(flow.isReviewing)
-    #expect(flow.recognizedText == "Swift actor isolation\nother words")
+    #expect(lookup.text == "Swift actor isolation\nother words")
     #expect(explainer.requests.isEmpty)
 
-    await flow.confirm(lookup: lookup, selectedText: " actor isolation ")
+    await lookup.submit(selectedPhrase: " actor isolation ")
 
     #expect(explainer.requests.map(\.text) == ["actor isolation"])
     #expect(lookup.phase == .result)
-    #expect(!flow.isReviewing)
+    #expect(lookup.text == "actor isolation")
 }
 
 @Test @MainActor
-func cancelledRegionRestoresPanelWithoutLookup() async {
+func cancelledRegionLeavesPanelClosedWithoutLookup() async {
     let recognizer = FakeRegionRecognizer(result: nil)
     let flow = OCRLookupFlow(recognizer: recognizer)
     let lookup = LookupCoordinator(explainer: RecordingExplainer(), preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.text = "previous word"
     var showCount = 0
 
     await flow.start(lookup: lookup, hidePanel: {}, showPanel: { showCount += 1 })
 
-    #expect(showCount == 1)
+    #expect(showCount == 0)
     #expect(!flow.isReviewing)
     #expect(flow.errorMessage == nil)
+    #expect(lookup.text == "previous word")
+}
+
+@Test @MainActor
+func failedRecognitionKeepsPreviousLookupAndShowsError() async {
+    let flow = OCRLookupFlow(recognizer: FailingRegionRecognizer())
+    let lookup = LookupCoordinator(explainer: RecordingExplainer(), preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.text = "previous word"
+    var showCount = 0
+
+    await flow.start(lookup: lookup, hidePanel: {}, showPanel: {
+        showCount += 1
+        #expect(flow.isRecognizing)
+    })
+
+    #expect(showCount == 1)
+    #expect(!flow.isRecognizing)
+    #expect(flow.errorMessage != nil)
+    #expect(lookup.text == "previous word")
 }
 
 @MainActor
 private struct FakeRegionRecognizer: RegionTextRecognizing {
     let result: OCRRecognition?
-    func recognizeSelectedRegion() async throws -> OCRRecognition? { result }
+    func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
+        if result != nil { await onSelection() }
+        return result
+    }
 }
+
+@MainActor
+private struct FailingRegionRecognizer: RegionTextRecognizing {
+    func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
+        await onSelection()
+        throw TestRegionError.failed
+    }
+}
+
+private enum TestRegionError: Error { case failed }
 
 @Test @MainActor
 func confidentShortOCRAutomaticallyLooksUpExactlyOnce() async {
@@ -59,8 +92,30 @@ func confidentShortOCRAutomaticallyLooksUpExactlyOnce() async {
     #expect(explainer.requests.map(\.text) == ["actor isolation"])
     #expect(lookup.phase == .result)
     #expect(!flow.isReviewing)
-    await flow.confirm(lookup: lookup)
     #expect(explainer.requests.count == 1)
+}
+
+@Test @MainActor
+func regionLookupWaitsForPanelToReopenBeforeSubmitting() async {
+    let explainer = RecordingExplainer()
+    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = OCRLookupFlow(recognizer: FakeRegionRecognizer(result: OCRRecognition(text: "isolation", confidence: 0.98)))
+    var events: [String] = []
+    explainer.onExplain = { events.append("lookup") }
+
+    await flow.start(lookup: lookup, hidePanel: { events.append("hide") }, showPanel: {
+        #expect(lookup.text.isEmpty)
+        #expect(!flow.isSelecting)
+        #expect(flow.isRecognizing)
+        events.append("show-start")
+        try? await Task.sleep(for: .milliseconds(10))
+        events.append("show-finished")
+    })
+
+    #expect(events == ["hide", "show-start", "show-finished", "lookup"])
+    #expect(lookup.phase == .result)
+    #expect(!flow.isRecognizing)
 }
 
 @Test(arguments: [
@@ -77,13 +132,16 @@ func uncertainOrLongOCRWaitsForReview(result: OCRRecognition) async {
     await flow.start(lookup: lookup, hidePanel: {}, showPanel: {})
 
     #expect(flow.isReviewing)
+    #expect(lookup.text == result.text)
     #expect(explainer.requests.isEmpty)
 }
 
 @MainActor
 private final class RecordingExplainer: LocalExplaining {
     var requests: [LookupRequest] = []
+    var onExplain: (() -> Void)?
     func explain(_ request: LookupRequest) async throws -> LookupResult {
+        onExplain?()
         requests.append(request)
         return LookupResult(meaning: "Meaning", example: "Example", detail: "")
     }

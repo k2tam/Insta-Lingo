@@ -24,7 +24,6 @@ public enum SelectionLookupStatus: Equatable, Sendable {
 @MainActor @Observable
 public final class SelectionLookupFlow {
     public private(set) var status: SelectionLookupStatus = .idle
-    public private(set) var selectedText = ""
     public private(set) var errorMessage: String?
 
     @ObservationIgnored private let reader: any SelectedTextReading
@@ -33,10 +32,9 @@ public final class SelectionLookupFlow {
         self.reader = reader
     }
 
-    public func start(lookup: LookupCoordinator, reviewSelection: Bool = false) async {
+    public func start(lookup: LookupCoordinator) async {
         guard status != .reading else { return }
         status = .reading
-        selectedText = ""
         errorMessage = nil
         switch await reader.readSelectedText() {
         case .selected(let text):
@@ -45,11 +43,10 @@ public final class SelectionLookupFlow {
                 status = .regionFallback
                 return
             }
-            if reviewSelection {
-                selectedText = selected
+            lookup.text = selected
+            if !LookupCoordinator.isClearShortPhrase(selected) {
                 status = .reviewing
             } else {
-                lookup.text = selected
                 status = .idle
                 await lookup.submit()
             }
@@ -60,22 +57,9 @@ public final class SelectionLookupFlow {
         }
     }
 
-    public func confirm(lookup: LookupCoordinator, phrase: String, sentence: String? = nil) async {
-        guard status == .reviewing else { return }
-        guard let choice = SelectedLookupText(source: selectedText, phrase: phrase, sentence: sentence) else {
-            errorMessage = "Choose a phrase and optional sentence from the selected text. The sentence must contain the phrase."
-            return
-        }
-        lookup.text = choice.phrase
-        errorMessage = nil
-        status = .idle
-        await lookup.submit(selectedSentence: choice.sentence)
-    }
-
     public func reset() {
         guard status != .reading else { return }
         status = .idle
-        selectedText = ""
         errorMessage = nil
     }
 }

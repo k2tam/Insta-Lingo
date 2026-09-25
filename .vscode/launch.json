@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:TransAtGlance}",
+            "name": "Debug TransAtGlance",
+            "target": "TransAtGlance",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug TransAtGlance"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:TransAtGlance}",
+            "name": "Release TransAtGlance",
+            "target": "TransAtGlance",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release TransAtGlance"
+        }
+    ]
+}

@@ -1,7 +1,7 @@
-# Ưu tiên xử lý lượt tra trên máy
+# Ưu tiên Groq cho lượt tra
 
-Ứng dụng dùng xử lý trên máy theo mặc định: Apple Foundation Models cho giải nghĩa theo ngữ cảnh và Apple Translation cho các cặp ngôn ngữ được hỗ trợ. Gemini API là lựa chọn người dùng tự bật và cấu hình bằng khóa API riêng; khi bật, nội dung cần tra và ngữ cảnh được gửi đến Google. Cách này ưu tiên tốc độ và riêng tư trong luồng tra nhanh, đồng thời giữ một đường cloud cho trường hợp người dùng muốn chất lượng hoặc ngôn ngữ khác. Gói Google AI Pro không được coi là quyền sử dụng Gemini API của ứng dụng.
+Ứng dụng dùng model `openai/gpt-oss-120b` qua Groq theo mặc định để giải nghĩa và dịch theo ngữ cảnh. Khi chọn Groq, nội dung cần tra, ngôn ngữ kết quả và ngữ cảnh chuyên môn được gửi đến Groq. Khóa API do người dùng cung cấp được lưu trong macOS Keychain. Apple Foundation Models và Apple Translation vẫn là lựa chọn xử lý trên máy.
 
 ## Consequences
 
-Ứng dụng phải kiểm tra tính sẵn có của model và ngôn ngữ lúc chạy, rồi giải thích rõ khi đường xử lý đã chọn không dùng được. Khóa Gemini API và quota/billing thuộc cấu hình riêng của người dùng.
+Người dùng phải thêm Groq API key trước khi tra bằng Groq. Ứng dụng phải công khai dữ liệu nào được gửi lên cloud và báo rõ lỗi khóa, mạng, hạn mức hoặc kết quả không hợp lệ. Với nguồn Apple, ứng dụng kiểm tra tính sẵn có của model và ngôn ngữ lúc chạy rồi nêu rõ lý do khi không thể dùng. Ứng dụng không âm thầm chuyển đổi giữa Groq và Apple.

@@ -25,8 +25,23 @@ final class StatusPanelController: NSObject {
     }
 
     func show() {
-        guard let button = item.button, popover.contentViewController != nil else { return }
         NSApp.activate(ignoringOtherApps: true)
+        present()
+    }
+
+    /// The region overlay leaves another app active. Wait for AppKit to finish
+    /// activating us before presenting a transient popover, or it can close
+    /// immediately as an outside-app interaction.
+    func showAfterRegionSelection() async {
+        NSApp.activate(ignoringOtherApps: true)
+        for _ in 0..<50 where !NSApp.isActive {
+            try? await Task.sleep(for: .milliseconds(20))
+        }
+        present()
+    }
+
+    private func present() {
+        guard let button = item.button, popover.contentViewController != nil else { return }
         if !popover.isShown {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         }

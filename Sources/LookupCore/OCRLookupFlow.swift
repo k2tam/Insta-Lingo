@@ -16,15 +16,17 @@ public struct OCRRecognition: Equatable, Sendable {
 
 @MainActor
 public protocol RegionTextRecognizing {
-    func recognizeSelectedRegion() async throws -> OCRRecognition?
+    /// Called as soon as a valid region is selected, before capture and OCR.
+    /// A cancelled selection returns nil without calling this closure.
+    func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition?
 }
 
 @MainActor @Observable
 public final class OCRLookupFlow {
     public private(set) var isSelecting = false
+    public private(set) var isRecognizing = false
     public private(set) var isReviewing = false
     public private(set) var errorMessage: String?
-    public var recognizedText = ""
 
     @ObservationIgnored private let recognizer: any RegionTextRecognizing
 
@@ -32,31 +34,39 @@ public final class OCRLookupFlow {
         self.recognizer = recognizer
     }
 
-    public func start(lookup: LookupCoordinator, hidePanel: () -> Void, showPanel: () -> Void) async {
-        guard !isSelecting else { return }
+    public func start(lookup: LookupCoordinator, hidePanel: () -> Void, showPanel: () async -> Void) async {
+        guard !isSelecting && !isRecognizing else { return }
         isSelecting = true
+        isRecognizing = false
         isReviewing = false
         errorMessage = nil
-        recognizedText = ""
         hidePanel()
         var automaticText: String?
+        var panelOpened = false
 
         do {
-            if let recognition = try await recognizer.recognizeSelectedRegion() {
-                recognizedText = recognition.text.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let recognition = try await recognizer.recognizeSelectedRegion(onSelection: {
+                isSelecting = false
+                isRecognizing = true
+                await showPanel()
+                panelOpened = true
+            }) {
+                let recognizedText = recognition.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 if recognizedText.isEmpty {
                     errorMessage = "No readable text was found in the selected region. Try selecting a clearer area."
                 } else if Self.isSafeToSubmitAutomatically(recognition) {
                     automaticText = recognizedText
                 } else {
+                    lookup.text = recognizedText
                     isReviewing = true
                 }
             }
         } catch {
             errorMessage = error.localizedDescription
+            if !panelOpened { await showPanel() }
         }
         isSelecting = false
-        showPanel()
+        isRecognizing = false
         if let automaticText {
             lookup.text = automaticText
             await lookup.submit()
@@ -67,36 +77,11 @@ public final class OCRLookupFlow {
     /// without sentence punctuation or ambiguous symbols, and strong confidence.
     static func isSafeToSubmitAutomatically(_ recognition: OCRRecognition) -> Bool {
         let text = recognition.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard recognition.confidence >= 0.90,
-              text.count <= 32,
-              !text.contains(where: \.isNewline) else { return false }
-        let words = text.split(whereSeparator: \.isWhitespace)
-        guard (1...4).contains(words.count) else { return false }
-        return words.allSatisfy { word in
-            word.unicodeScalars.allSatisfy {
-                CharacterSet.letters.contains($0) || $0 == "'" || $0 == "-"
-            }
-        }
-    }
-
-    public func confirm(lookup: LookupCoordinator, selectedText: String? = nil, selectedSentence: String? = nil) async {
-        guard isReviewing else { return }
-        let selected = (selectedText ?? recognizedText).trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let choice = SelectedLookupText(source: recognizedText, phrase: selected, sentence: selectedSentence) else {
-            errorMessage = selected.isEmpty
-                ? "Choose an English word or short phrase from the recognized text."
-                : "Choose a phrase and optional sentence from the selected text. The sentence must contain the phrase."
-            return
-        }
-        lookup.text = choice.phrase
-        isReviewing = false
-        errorMessage = nil
-        await lookup.submit(selectedSentence: choice.sentence)
+        return recognition.confidence >= 0.90 && LookupCoordinator.isClearShortPhrase(text)
     }
 
     public func cancelReview() {
         isReviewing = false
-        recognizedText = ""
         errorMessage = nil
     }
 }

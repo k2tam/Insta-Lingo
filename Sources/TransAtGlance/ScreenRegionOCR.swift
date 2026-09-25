@@ -6,55 +6,79 @@ import Vision
 
 @MainActor
 final class ScreenRegionOCR: RegionTextRecognizing {
-    func recognizeSelectedRegion() async throws -> OCRRecognition? {
-        // Do not request this permission at launch. It belongs to the user's
-        // explicit "Select screen region" action.
-        guard CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() else {
-            throw ScreenRegionError.permissionDenied
-        }
-
+    func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
         let session = ScreenRegionSelectionSession()
         guard let region = await session.selectRegion() else { return nil }
-
-        // Allow the compositor to remove the selection overlay before capture.
-        try await Task.sleep(for: .milliseconds(120))
+        await onSelection()
 
         // The CGImage is confined to this function. Neither the flow state nor
         // the lookup request has an image field, and nothing is written to disk.
-        let image = try await SCScreenshotManager.captureImage(in: region)
-        let request = VNRecognizeTextRequest()
-        request.recognitionLevel = .accurate
-        request.recognitionLanguages = ["en-US"]
-        request.usesLanguageCorrection = true
-        let handler = VNImageRequestHandler(cgImage: image)
-        try handler.perform([request])
-        let candidates = request.results?.compactMap { $0.topCandidates(1).first } ?? []
-        return OCRRecognition(
-            text: candidates.map(\.string).joined(separator: "\n"),
-            confidence: candidates.map(\.confidence).min() ?? 0
-        )
+        let image: CGImage
+        do {
+            let content = try await SCShareableContent.current
+            guard let display = content.displays.first(where: { $0.displayID == region.displayID }) else {
+                throw ScreenRegionError.displayUnavailable
+            }
+            let ownApplications = content.applications.filter { $0.processID == ProcessInfo.processInfo.processIdentifier }
+            guard !ownApplications.isEmpty else { throw ScreenRegionError.displayUnavailable }
+            let filter = SCContentFilter(display: display, excludingApplications: ownApplications, exceptingWindows: [])
+            let configuration = SCStreamConfiguration()
+            configuration.sourceRect = region.rect.offsetBy(dx: -display.frame.minX, dy: -display.frame.minY)
+            configuration.width = Int(ceil(region.rect.width * CGFloat(filter.pointPixelScale)))
+            configuration.height = Int(ceil(region.rect.height * CGFloat(filter.pointPixelScale)))
+            configuration.showsCursor = false
+            image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration)
+        } catch {
+            let captureError = error as NSError
+            if captureError.domain == SCStreamErrorDomain,
+               captureError.code == SCStreamError.userDeclined.rawValue {
+                throw ScreenRegionError.permissionDenied
+            }
+            throw error
+        }
+        return try await Task.detached(priority: .userInitiated) {
+            let request = VNRecognizeTextRequest()
+            request.recognitionLevel = .accurate
+            request.recognitionLanguages = ["en-US"]
+            request.usesLanguageCorrection = true
+            let handler = VNImageRequestHandler(cgImage: image)
+            try handler.perform([request])
+            let candidates = request.results?.compactMap { $0.topCandidates(1).first } ?? []
+            return OCRRecognition(
+                text: candidates.map(\.string).joined(separator: "\n"),
+                confidence: candidates.map(\.confidence).min() ?? 0
+            )
+        }.value
     }
 }
 
 private enum ScreenRegionError: LocalizedError {
     case permissionDenied
+    case displayUnavailable
 
     var errorDescription: String? {
         switch self {
         case .permissionDenied:
-            "Screen Recording permission is needed to read the region you select. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then try again."
+            "macOS did not authorize this screen capture. Enable TransAtGlance in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app."
+        case .displayUnavailable:
+            "Could not capture the selected screen. Try again."
         }
     }
 }
 
 /// A one-shot selection surface on every connected display. Each panel joins
 /// full-screen spaces without activating our app or moving the reader's space.
+private struct SelectedRegion {
+    let rect: CGRect
+    let displayID: CGDirectDisplayID
+}
+
 @MainActor
 private final class ScreenRegionSelectionSession {
     private var windows: [NSPanel] = []
-    private var continuation: CheckedContinuation<CGRect?, Never>?
+    private var continuation: CheckedContinuation<SelectedRegion?, Never>?
 
-    func selectRegion() async -> CGRect? {
+    func selectRegion() async -> SelectedRegion? {
         // NSScreen.screens starts with the menu-bar (main) display, whose top
         // edge is the origin for ScreenCaptureKit's global display space.
         guard let mainScreen = NSScreen.screens.first else { return nil }
@@ -63,14 +87,18 @@ private final class ScreenRegionSelectionSession {
             let overlay = RegionSelectionView(frame: CGRect(origin: .zero, size: screen.frame.size))
             overlay.onFinish = { [weak self] localRect in
                 guard let self else { return }
-                let captureRect = localRect.map {
-                    ScreenCaptureRegionMapping.captureRect(
-                        localRect: $0,
-                        screenFrame: screen.frame,
-                        mainScreenFrame: mainFrame
+                let selectedRegion = localRect.flatMap { rect -> SelectedRegion? in
+                    guard let displayID = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value else { return nil }
+                    return SelectedRegion(
+                        rect: ScreenCaptureRegionMapping.captureRect(
+                            localRect: rect,
+                            screenFrame: screen.frame,
+                            mainScreenFrame: mainFrame
+                        ),
+                        displayID: displayID
                     )
                 }
-                self.finish(with: captureRect)
+                self.finish(with: selectedRegion)
             }
 
             let window = RegionSelectionPanel(
@@ -102,13 +130,13 @@ private final class ScreenRegionSelectionSession {
         }
     }
 
-    private func finish(with rect: CGRect?) {
+    private func finish(with region: SelectedRegion?) {
         guard let waiting = continuation else { return }
         continuation = nil
         for window in windows { window.orderOut(nil) }
         windows.removeAll()
         NSCursor.pop()
-        waiting.resume(returning: rect)
+        waiting.resume(returning: region)
     }
 }
 

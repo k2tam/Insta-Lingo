@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import LookupCore
 import Observation
@@ -7,11 +8,18 @@ private final class PanelPresentationState {
     var isDetailExpanded = false
 }
 
+/// SwiftUI may recreate the `App` value while it reconciles scenes. Keep the
+/// AppKit status item outside that value so each reconstruction cannot add a
+/// second menu bar icon.
+@MainActor
+private enum AppRuntime {
+    static let statusPanel = StatusPanelController()
+}
+
 @main
 struct TransAtGlanceApp: App {
     @State private var lookup: LookupCoordinator
-    @State private var geminiConfiguration: GeminiConfiguration
-    @State private var fallbackSettings: GeminiFallbackSettings
+    @State private var groqConfiguration: GroqConfiguration
     @State private var history: LookupHistory
     @State private var favorites: LookupFavorites
     @State private var languageSettings: UILanguageSettings
@@ -22,16 +30,14 @@ struct TransAtGlanceApp: App {
     @State private var supplementaryWindows: SupplementaryWindowsController
 
     init() {
-        let configuration = GeminiConfiguration(credentials: GeminiKeychain())
-        let fallback = GeminiFallbackSettings()
+        let groqConfiguration = GroqConfiguration(credentials: GroqKeychain())
         let history = LookupHistory()
         let favorites = LookupFavorites()
         let lookup = LookupCoordinator(
             explainer: LocalFoundationExplainer(),
             translator: LocalAppleTranslator(),
-            gemini: GeminiProvider(),
-            geminiConfiguration: configuration,
-            fallbackSettings: fallback,
+            groq: GroqProvider(configuration: groqConfiguration),
+            groqConfiguration: groqConfiguration,
             history: history
         )
         let ocrFlow = OCRLookupFlow(recognizer: ScreenRegionOCR())
@@ -44,7 +50,7 @@ struct TransAtGlanceApp: App {
         )
         let hotkeys = GlobalHotkeyManager()
         let loginSettings = LaunchAtLoginSettings(service: MainAppLoginService())
-        let statusPanel = StatusPanelController()
+        let statusPanel = AppRuntime.statusPanel
         let panelState = PanelPresentationState()
 
         statusPanel.setContent(AnyView(
@@ -53,27 +59,28 @@ struct TransAtGlanceApp: App {
                 ocrFlow: ocrFlow,
                 selectionFlow: selectionFlow,
                 languageSettings: languageSettings,
-                geminiConfiguration: configuration,
                 favorites: favorites,
                 isDetailExpanded: Binding(
                     get: { panelState.isDetailExpanded },
                     set: { panelState.isDetailExpanded = $0 }
                 ),
                 hidePanel: { [weak statusPanel] in statusPanel?.hide() },
-                showPanel: { [weak statusPanel] in statusPanel?.show() },
+                showPanel: { [weak statusPanel] in await statusPanel?.showAfterRegionSelection() },
+                quitApp: { NSApp.terminate(nil) },
                 openHistory: { supplementaryWindows.showHistory() },
                 openFavorites: { supplementaryWindows.showFavorites() },
                 openSettings: {
+                    statusPanel.hide()
                     supplementaryWindows.showSettings(content: AppSettingsView(
                         loginSettings: loginSettings,
-                        geminiConfiguration: configuration,
-                        fallbackSettings: fallback,
+                        groqConfiguration: groqConfiguration,
                         hotkeys: hotkeys,
+                        lookup: lookup,
                         languageSettings: languageSettings
                     ))
                 }
             )
-            .frame(width: 340)
+            .frame(width: 680)
         ))
 
         hotkeys.onAction = { [weak statusPanel] action in
@@ -82,22 +89,21 @@ struct TransAtGlanceApp: App {
                 statusPanel?.show()
             case .selectedText:
                 statusPanel?.show()
-                Task { await selectionFlow.start(lookup: lookup, reviewSelection: true) }
+                Task { await selectionFlow.start(lookup: lookup) }
             case .screenRegion:
                 selectionFlow.reset()
                 Task {
                     await ocrFlow.start(
                         lookup: lookup,
                         hidePanel: { [weak statusPanel] in statusPanel?.hide() },
-                        showPanel: { [weak statusPanel] in statusPanel?.show() }
+                        showPanel: { [weak statusPanel] in await statusPanel?.showAfterRegionSelection() }
                     )
                 }
             }
         }
 
-        _geminiConfiguration = State(initialValue: configuration)
-        _fallbackSettings = State(initialValue: fallback)
         _history = State(initialValue: history)
+        _groqConfiguration = State(initialValue: groqConfiguration)
         _favorites = State(initialValue: favorites)
         _lookup = State(initialValue: lookup)
         _languageSettings = State(initialValue: languageSettings)
@@ -111,9 +117,9 @@ struct TransAtGlanceApp: App {
         Settings {
             AppSettingsView(
                 loginSettings: loginSettings,
-                geminiConfiguration: geminiConfiguration,
-                fallbackSettings: fallbackSettings,
+                groqConfiguration: groqConfiguration,
                 hotkeys: hotkeys,
+                lookup: lookup,
                 languageSettings: languageSettings
             )
         }

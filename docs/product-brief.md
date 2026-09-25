@@ -9,7 +9,7 @@ Giúp người đang đọc tài liệu trên macOS hiểu nhanh một từ ho�
 - App sống trên menu bar. Bấm icon hoặc dùng phím tắt toàn hệ thống để mở bảng tra.
 - Có ba nguồn chữ: nhập tay, đọc phần chữ đã bôi đen trong ứng dụng đang dùng, hoặc kéo khoanh vùng màn hình rồi OCR. Nếu ứng dụng không cung cấp chữ đã bôi đen, đề nghị kéo vùng.
 - Thao tác kéo vùng hoạt động trên màn hình chính, màn hình phụ và khi tài liệu ở full screen. Nếu OCR nhận được một từ/cụm ngắn rõ ràng, app tra ngay; nếu vùng có nhiều chữ hoặc kết quả không chắc, cho sửa/chọn nội dung cần tra trước.
-- Người dùng có thể cung cấp thêm câu ngữ cảnh trong phạm vi chữ tự chọn. App không tự lấy nội dung bên ngoài vùng đã chọn.
+- Lượt tra chỉ dùng ngữ cảnh chuyên môn đang chọn. App không tự lấy nội dung bên ngoài vùng đã chọn.
 - Bảng tra neo ở menu bar, tự đóng khi người dùng quay lại tài liệu và giữ kết quả gần nhất để mở lại.
 
 ## Kết quả và lựa chọn
@@ -17,8 +17,8 @@ Giúp người đang đọc tài liệu trên macOS hiểu nhanh một từ ho�
 - Nguồn chính ở bản đầu là tiếng Anh. Đích mặc định là tiếng Việt; có English → English để giải nghĩa bằng tiếng Anh dễ hiểu và có thể chọn thêm ngôn ngữ đích. App nhớ ngôn ngữ gần nhất.
 - Kết quả gọn: nghĩa chính, một ví dụ phù hợp ngữ cảnh và nút mở rộng.
 - Preset đầu tiên: General, Software Development, Swift/iOS. Người dùng có thể tạo preset bằng tên và mô tả ngắn.
-- Xử lý trên máy là mặc định. Apple Foundation Models giải nghĩa theo ngữ cảnh; Apple Translation dịch khi hỗ trợ cặp ngôn ngữ. Gemini API là lựa chọn cloud, người dùng tự cung cấp khóa. Khi Gemini đã bật mà local không dùng được, app hỏi một lần rồi nhớ cách fallback.
-- Người dùng có thể chọn Local hoặc Gemini ngay trong bảng tra cho từng lượt; lựa chọn mặc định là Local.
+- Groq chạy `openai/gpt-oss-120b` là nguồn mặc định để giải nghĩa và dịch theo ngữ cảnh. Người dùng tự cung cấp API key, được lưu trong macOS Keychain. Apple Foundation Models và Apple Translation là nguồn xử lý trên máy thay thế.
+- Người dùng có thể chọn Groq hoặc Apple ngay trong bảng tra cho từng lượt; lựa chọn mặc định là Groq.
 
 ## Xem lại
 
@@ -32,7 +32,7 @@ Giúp người đang đọc tài liệu trên macOS hiểu nhanh một từ ho�
 ## Tiêu chí kiểm tra bản đầu
 
 - Từ một trang tài liệu đang mở, người dùng có thể kích hoạt kéo vùng, tra một từ/cụm, đọc nghĩa và quay lại trang mà không phải mở trình duyệt.
-- Từ tiếng Anh có thể được giải nghĩa bằng tiếng Anh đơn giản hoặc dịch sang tiếng Việt; app hiển thị rõ khi cặp ngôn ngữ hoặc model local không sẵn.
+- Từ tiếng Anh có thể được giải nghĩa bằng tiếng Anh đơn giản hoặc dịch sang tiếng Việt; app hiển thị rõ khi Groq hoặc nguồn Apple không sẵn.
 - Từ/cụm có thể được tra qua chữ bôi đen, nhập tay và OCR; đường bôi đen thất bại dẫn sang kéo vùng.
 - Lịch sử và mục yêu thích tồn tại sau khi thoát app; xóa lịch sử không xóa mục yêu thích.
-- Giao diện chuyển được giữa tiếng Việt và tiếng Anh; khóa Gemini được lưu riêng với dữ liệu lịch sử.
+- Giao diện chuyển được giữa tiếng Việt và tiếng Anh; khóa Groq được lưu riêng với dữ liệu lịch sử.

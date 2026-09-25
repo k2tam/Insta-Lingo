@@ -8,7 +8,7 @@ struct LaunchAtLoginSettingsView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        Form {
+        Group {
             Toggle(strings.launchAtLogin, isOn: Binding(
                 get: { settings.isEnabled },
                 set: { settings.setEnabled($0) }
@@ -28,9 +28,6 @@ struct LaunchAtLoginSettingsView: View {
                     .foregroundStyle(.red)
             }
         }
-        .formStyle(.grouped)
-        .frame(minWidth: 450)
-        .padding()
         .onAppear { settings.refreshStatus() }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { settings.refreshStatus() }
