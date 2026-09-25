@@ -24,6 +24,19 @@ func invalidSavedLanguageFallsBackToVietnamese() {
 }
 
 @Test
+func lookupInteractionStringsAreAvailableInBothInterfaceLanguages() {
+    let vietnamese = UIStrings(language: .vietnamese)
+    let english = UIStrings(language: .english)
+
+    #expect(vietnamese.copyResult == "Sao chép")
+    #expect(vietnamese.copiedResult == "Đã sao chép")
+    #expect(vietnamese.retryLookup == "Thử lại")
+    #expect(english.copyResult == "Copy")
+    #expect(english.copiedResult == "Copied")
+    #expect(english.retryLookup == "Try again")
+}
+
+@Test
 func localizedMessagesCoverCurrentLookupAndPermissionFailures() {
     let vietnamese = UIStrings(language: .vietnamese)
     let english = UIStrings(language: .english)

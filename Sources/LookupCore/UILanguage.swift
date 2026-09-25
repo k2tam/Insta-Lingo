@@ -49,6 +49,12 @@ public struct UIStrings: Sendable {
     public var simpleEnglish: String { choose("Tiếng Anh đơn giản", "Simple English") }
     public var local: String { choose("Apple trên máy", "Apple on-device") }
     public var lookup: String { choose("Tra nghĩa", "Look up") }
+    public var retryLookup: String { choose("Thử lại", "Try again") }
+    public var lookupFailed: String { choose("Chưa thể hoàn tất lượt tra", "The lookup could not be completed") }
+    public var copyResult: String { choose("Sao chép", "Copy") }
+    public var copiedResult: String { choose("Đã sao chép", "Copied") }
+    public var showLess: String { choose("Thu gọn", "Show less") }
+    public var resultExample: String { choose("Ví dụ", "Example") }
     public var historyTitle: String { choose("Lịch sử tra", "Lookup history") }
     public var quitApp: String { choose("Thoát ứng dụng", "Quit") }
     public var idle: String { choose("Nhập từ hoặc cụm ngắn để xem nghĩa.", "Type a word or short phrase to see its meaning.") }

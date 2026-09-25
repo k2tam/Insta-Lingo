@@ -5,6 +5,7 @@ struct ProfessionalContextPicker: View {
     let catalog: ProfessionalContextCatalog
     let strings: UIStrings
     @State private var isCreating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -17,10 +18,24 @@ struct ProfessionalContextPicker: View {
                     ForEach(catalog.visibleContexts) { context in
                         let isSelected = context.id == catalog.selectedContext.id
                         Button {
-                            catalog.select(id: context.id)
+                            if reduceMotion {
+                                catalog.select(id: context.id)
+                            } else {
+                                withAnimation(.easeOut(duration: 0.15)) {
+                                    catalog.select(id: context.id)
+                                }
+                            }
                         } label: {
-                            Text(strings.contextName(id: context.id, customName: context.name))
-                                .lineLimit(1)
+                            HStack(spacing: 5) {
+                                if isSelected {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption.weight(.bold))
+                                        .accessibilityHidden(true)
+                                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
+                                }
+                                Text(strings.contextName(id: context.id, customName: context.name))
+                                    .lineLimit(1)
+                            }
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 6)
                                 .foregroundStyle(isSelected ? Color.white : Color.primary)
@@ -33,6 +48,7 @@ struct ProfessionalContextPicker: View {
                         .buttonStyle(.plain)
                         .accessibilityLabel(strings.professionalContextAccessibility(strings.contextName(id: context.id, customName: context.name)))
                         .accessibilityAddTraits(isSelected ? .isSelected : [])
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isSelected)
                     }
 
                     Button(strings.newContext, systemImage: "plus") {

@@ -6,6 +6,7 @@ import Observation
 @MainActor @Observable
 private final class PanelPresentationState {
     var isDetailExpanded = false
+    var inputFocusGeneration = 0
 }
 
 /// SwiftUI may recreate the `App` value while it reconciles scenes. Keep the
@@ -52,6 +53,10 @@ struct TransAtGlanceApp: App {
         let loginSettings = LaunchAtLoginSettings(service: MainAppLoginService())
         let statusPanel = AppRuntime.statusPanel
         let panelState = PanelPresentationState()
+        statusPanel.onPresent = { shouldFocusInput in
+            guard shouldFocusInput else { return }
+            panelState.inputFocusGeneration += 1
+        }
 
         statusPanel.setContent(AnyView(
             LookupPanel(
@@ -63,6 +68,10 @@ struct TransAtGlanceApp: App {
                 isDetailExpanded: Binding(
                     get: { panelState.isDetailExpanded },
                     set: { panelState.isDetailExpanded = $0 }
+                ),
+                inputFocusGeneration: Binding(
+                    get: { panelState.inputFocusGeneration },
+                    set: { panelState.inputFocusGeneration = $0 }
                 ),
                 hidePanel: { [weak statusPanel] in statusPanel?.hide() },
                 showPanel: { [weak statusPanel] in await statusPanel?.showAfterRegionSelection() },
@@ -88,7 +97,7 @@ struct TransAtGlanceApp: App {
             case .openPanel:
                 statusPanel?.show()
             case .selectedText:
-                statusPanel?.show()
+                statusPanel?.show(focusInput: false)
                 Task { await selectionFlow.start(lookup: lookup) }
             case .screenRegion:
                 selectionFlow.reset()

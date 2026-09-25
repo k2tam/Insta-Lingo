@@ -7,6 +7,7 @@ import SwiftUI
 final class StatusPanelController: NSObject {
     private let item: NSStatusItem
     private let popover = NSPopover()
+    var onPresent: ((Bool) -> Void)?
 
     override init() {
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -24,9 +25,9 @@ final class StatusPanelController: NSObject {
         popover.contentViewController = hosting
     }
 
-    func show() {
+    func show(focusInput: Bool = true) {
         NSApp.activate(ignoringOtherApps: true)
-        present()
+        present(focusInput: focusInput)
     }
 
     /// The region overlay leaves another app active. Wait for AppKit to finish
@@ -37,13 +38,14 @@ final class StatusPanelController: NSObject {
         for _ in 0..<50 where !NSApp.isActive {
             try? await Task.sleep(for: .milliseconds(20))
         }
-        present()
+        present(focusInput: false)
     }
 
-    private func present() {
+    private func present(focusInput: Bool) {
         guard let button = item.button, popover.contentViewController != nil else { return }
         if !popover.isShown {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            onPresent?(focusInput)
         }
     }
 
