@@ -1,6 +1,9 @@
 import AppKit
 import ApplicationServices
 import LookupCore
+import OSLog
+
+private let selectionDebugLogger = Logger(subsystem: "com.k2tam.InstaLingo", category: "DEBUG-hotkey-7f3a")
 
 /// Remembers the document application while the menu bar panel takes focus.
 /// The reader never searches other applications for text.
@@ -46,9 +49,12 @@ final class AccessibilitySelectedTextReader: SelectedTextReading {
 
     func readSelectedText() async -> SelectionReadResult {
         let targetPID = permissionPendingPID ?? previousApp.processIdentifier
+        let targetBundleID = targetPID.flatMap { NSRunningApplication(processIdentifier: $0)?.bundleIdentifier } ?? "none"
+        selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] read target=\(targetBundleID, privacy: .public)")
         // The AX prompt option's constant is imported as mutable global state
         // under Swift 6. Use its documented dictionary key spelling.
         guard AXIsProcessTrustedWithOptions(["AXTrustedCheckOptionPrompt": true] as CFDictionary) else {
+            selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] accessibility permission required")
             permissionPendingPID = targetPID
             return .permissionRequired
         }
@@ -58,20 +64,61 @@ final class AccessibilitySelectedTextReader: SelectedTextReading {
         let application = AXUIElementCreateApplication(pid)
         AXUIElementSetMessagingTimeout(application, 1)
         var focusedValue: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(application, kAXFocusedUIElementAttribute as CFString, &focusedValue) == .success,
+        let focusedError = AXUIElementCopyAttributeValue(application, kAXFocusedUIElementAttribute as CFString, &focusedValue)
+        guard focusedError == .success,
               let focusedValue,
               CFGetTypeID(focusedValue) == AXUIElementGetTypeID() else {
+            selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] focused element unavailable error=\(focusedError.rawValue)")
             return .unavailable
         }
         let focusedElement = focusedValue as! AXUIElement
         AXUIElementSetMessagingTimeout(focusedElement, 1)
 
+        var attributeNames: CFArray?
+        let namesError = AXUIElementCopyAttributeNames(focusedElement, &attributeNames)
+        let names = attributeNames as? [String] ?? []
+        let hasMarkerRange = names.contains("AXSelectedTextMarkerRange")
+        selectionDebugLogger.notice(
+            "[DEBUG-hotkey-7f3a] focused attributes error=\(namesError.rawValue) text=\(names.contains(kAXSelectedTextAttribute)) range=\(names.contains(kAXSelectedTextRangeAttribute)) markerRange=\(hasMarkerRange)"
+        )
+
         var selectedValue: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(focusedElement, kAXSelectedTextAttribute as CFString, &selectedValue) == .success,
-              let selectedText = selectedValue as? String,
-              !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            return .unavailable
+        let selectedError = AXUIElementCopyAttributeValue(focusedElement, kAXSelectedTextAttribute as CFString, &selectedValue)
+        if selectedError == .success,
+           let selectedText = selectedValue as? String,
+           !selectedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] selected text available")
+            return .selected(selectedText)
         }
-        return .selected(selectedText)
+
+        // Web content such as Safari pages exposes its selection as a text
+        // marker range rather than the editable-text AXSelectedText value.
+        var markerRangeValue: CFTypeRef?
+        let markerRangeError = AXUIElementCopyAttributeValue(
+            focusedElement,
+            kAXSelectedTextMarkerRangeAttribute as CFString,
+            &markerRangeValue
+        )
+        if markerRangeError == .success, let markerRangeValue {
+            var markerTextValue: CFTypeRef?
+            let markerTextError = AXUIElementCopyParameterizedAttributeValue(
+                focusedElement,
+                kAXStringForTextMarkerRangeParameterizedAttribute as CFString,
+                markerRangeValue,
+                &markerTextValue
+            )
+            if markerTextError == .success,
+               let markerText = markerTextValue as? String,
+               !markerText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] marker text available")
+                return .selected(markerText)
+            }
+            selectionDebugLogger.notice("[DEBUG-hotkey-7f3a] marker text unavailable error=\(markerTextError.rawValue)")
+        }
+
+        selectionDebugLogger.notice(
+            "[DEBUG-hotkey-7f3a] selected text unavailable textError=\(selectedError.rawValue) markerError=\(markerRangeError.rawValue)"
+        )
+        return .unavailable
     }
 }

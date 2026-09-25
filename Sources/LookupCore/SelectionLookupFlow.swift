@@ -23,6 +23,9 @@ public enum SelectionLookupStatus: Equatable, Sendable {
 
 @MainActor @Observable
 public final class SelectionLookupFlow {
+    private static let selectionReadAttempts = 3
+    private static let selectionReadRetryDelay = Duration.milliseconds(40)
+
     public private(set) var status: SelectionLookupStatus = .idle
     public private(set) var errorMessage: String?
 
@@ -36,7 +39,7 @@ public final class SelectionLookupFlow {
         guard status != .reading else { return }
         status = .reading
         errorMessage = nil
-        switch await reader.readSelectedText() {
+        switch await readSelectedText() {
         case .selected(let text):
             let selected = text.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !selected.isEmpty else {
@@ -55,6 +58,21 @@ public final class SelectionLookupFlow {
         case .unavailable:
             status = .regionFallback
         }
+    }
+
+    private func readSelectedText() async -> SelectionReadResult {
+        for attempt in 1...Self.selectionReadAttempts {
+            let result = await reader.readSelectedText()
+            guard result == .unavailable, attempt < Self.selectionReadAttempts else {
+                return result
+            }
+            do {
+                try await Task.sleep(for: Self.selectionReadRetryDelay)
+            } catch {
+                return .unavailable
+            }
+        }
+        return .unavailable
     }
 
     public func reset() {

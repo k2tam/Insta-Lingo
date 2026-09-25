@@ -37,6 +37,21 @@ func permissionIsRequestedOnActionAndCanBeRetried() async {
     #expect(flow.status == .idle)
 }
 
+@Test @MainActor
+func transientlyUnavailableBrowserSelectionIsRetried() async {
+    let reader = SequencedSelectedTextReader(results: [.unavailable, .selected("browser")])
+    let explainer = SelectionRecordingExplainer()
+    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(reader: reader)
+
+    await flow.start(lookup: lookup)
+
+    #expect(reader.calls == 2)
+    #expect(explainer.requests.map(\.text) == ["browser"])
+    #expect(flow.status == .idle)
+}
+
 @Test(arguments: [SelectionReadResult.unavailable, .selected("   ")]) @MainActor
 func unreadableOrEmptySelectionOffersRegionFallback(result: SelectionReadResult) async {
     let explainer = SelectionRecordingExplainer()

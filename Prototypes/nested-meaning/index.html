@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PROTOTYPE — Nested meaning</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+      --bg: #141619;
+      --panel: rgba(43, 44, 48, .97);
+      --surface: #202226;
+      --surface-2: #303238;
+      --line: rgba(255,255,255,.11);
+      --text: #f5f5f7;
+      --muted: #a6a7ae;
+      --blue: #0a84ff;
+      --blue-soft: rgba(10,132,255,.18);
+      --shadow: 0 24px 90px rgba(0,0,0,.56), 0 0 0 1px rgba(255,255,255,.18);
+    }
+    * { box-sizing: border-box; }
+    html { overflow-x: hidden; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 50px 24px 116px;
+      color: var(--text);
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 18% 12%, #293342 0, transparent 34%),
+        radial-gradient(circle at 82% 88%, #202a39 0, transparent 38%),
+        var(--bg);
+    }
+    button, input, select { font: inherit; }
+    button { color: inherit; }
+    .prototype-note { position: fixed; top: 18px; left: 20px; color: #adaeb5; font-size: 12px; }
+    .panel {
+      width: min(780px, calc(100vw - 48px));
+      min-height: 580px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 24px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(30px) saturate(1.15);
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+    .topbar { display: flex; align-items: center; gap: 10px; padding: 15px 20px; border-bottom: 1px solid var(--line); }
+    .brand { font-size: 17px; font-weight: 700; }
+    .spacer { flex: 1; }
+    .select, .icon-button {
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .select { padding: 0 28px 0 10px; }
+    .icon-button { width: 34px; cursor: pointer; }
+    .content { display: grid; gap: 16px; padding: 20px; }
+    .query-row { display: flex; gap: 9px; }
+    .query {
+      min-width: 0;
+      flex: 1;
+      height: 42px;
+      padding: 0 13px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 10px;
+      outline: none;
+      background: #1c1e22;
+      color: var(--text);
+    }
+    .primary { height: 42px; padding: 0 17px; border: 0; border-radius: 10px; background: var(--blue); font-weight: 650; }
+    .context-row { display: flex; gap: 8px; }
+    .chip { padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.05); color: #d6d7dc; }
+    .chip.active { border-color: rgba(102,177,255,.7); background: var(--blue-soft); }
+    .result {
+      position: relative;
+      min-height: 360px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(18,20,23,.6);
+    }
+    .result-main { min-width: 0; padding: 21px 22px; }
+    .result-head { display: flex; align-items: flex-start; gap: 12px; }
+    .term { font-size: 22px; font-weight: 720; letter-spacing: -.02em; }
+    .phonetic { margin-top: 4px; color: var(--muted); font-size: 13px; }
+    .save { margin-left: auto; border: 0; background: none; color: #b6d9ff; cursor: pointer; }
+    .meaning { margin: 18px 0 10px; font-size: 19px; line-height: 1.55; letter-spacing: -.01em; }
+    .translation { color: #c5c6cc; font-size: 14px; line-height: 1.5; }
+    .example-block { margin-top: 19px; padding: 13px 15px; border-left: 2px solid #6db3ff; border-radius: 0 9px 9px 0; background: rgba(255,255,255,.045); }
+    .example-label { margin-bottom: 5px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .example { color: #e1e1e5; font-size: 15px; line-height: 1.55; }
+    .hint { display: flex; align-items: center; gap: 7px; margin-top: 18px; color: #8f9199; font-size: 12px; }
+    .hint-icon { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,.07); }
+    .lookup-word { border-radius: 4px; cursor: default; }
+    .lookup-word:hover { background: rgba(10,132,255,.16); box-shadow: 0 0 0 2px rgba(10,132,255,.16); }
+    .lookup-word.selected { background: rgba(10,132,255,.25); box-shadow: 0 0 0 2px rgba(10,132,255,.25); }
+    .suggestions { display: flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--muted); font-size: 12px; }
+    .suggestions button { border: 0; border-radius: 999px; padding: 4px 8px; background: rgba(255,255,255,.075); cursor: pointer; }
+    .suggestions button:hover { background: rgba(10,132,255,.24); }
+    .state { padding: 9px 20px; border-top: 1px solid var(--line); background: rgba(0,0,0,.14); color: #85868e; font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    /* A — anchored peek */
+    .peek {
+      position: fixed;
+      z-index: 15;
+      width: 250px;
+      padding: 13px 14px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 12px;
+      background: #383a40;
+      box-shadow: 0 14px 38px rgba(0,0,0,.5);
+      transform: translate(-10px, 10px);
+    }
+    .peek[hidden] { display: none; }
+    .peek:before { content: ""; position: absolute; top: -6px; left: 20px; width: 10px; height: 10px; transform: rotate(45deg); background: #383a40; border-left: 1px solid rgba(255,255,255,.16); border-top: 1px solid rgba(255,255,255,.16); }
+    .mini-head { display: flex; align-items: center; gap: 8px; }
+    .mini-term { font-size: 15px; font-weight: 720; }
+    .mini-type { color: var(--muted); font-size: 11px; }
+    .close { margin-left: auto; border: 0; background: none; color: var(--muted); cursor: pointer; }
+    .mini-meaning { margin-top: 7px; color: #ececf0; font-size: 13px; line-height: 1.45; }
+    .mini-note { margin-top: 8px; color: #8fc7ff; font-size: 11px; }
+
+    /* B — persistent rail */
+    .rail-result { display: grid; grid-template-columns: minmax(0, 1fr) 238px; }
+    .rail { border-left: 1px solid var(--line); background: rgba(255,255,255,.035); padding: 18px 16px; }
+    .rail-title { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    .rail-empty { margin-top: 13px; color: #8f9097; font-size: 13px; line-height: 1.45; }
+    .rail-card { margin-top: 12px; }
+    .rail-card[hidden] { display: none; }
+    .rail-card .mini-term { font-size: 18px; }
+    .rail-card .mini-meaning { font-size: 14px; }
+    .rail-divider { height: 1px; margin: 14px 0; background: var(--line); }
+    .back-context { color: var(--muted); font-size: 11px; line-height: 1.4; }
+
+    /* C — inline thread */
+    .inline-slot { display: none; margin: 9px 0 3px; padding: 11px 13px; border: 1px solid rgba(102,177,255,.28); border-radius: 10px; background: rgba(10,132,255,.10); }
+    .inline-slot.open { display: block; }
+    .inline-slot .mini-head { margin-bottom: 4px; }
+    .inline-slot .mini-meaning { margin-top: 0; }
+    .inline-connector { color: #72b8ff; margin-right: 5px; }
+
+    .switcher {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #f4f4f6;
+      color: #171719;
+      box-shadow: 0 12px 36px rgba(0,0,0,.48);
+    }
+    .switcher button { width: 34px; height: 30px; border: 0; border-radius: 999px; background: transparent; color: #171719; cursor: pointer; }
+    .switcher button:hover { background: #dedee3; }
+    .variant-label { min-width: 235px; text-align: center; font-size: 13px; font-weight: 700; }
+    @media (max-width: 650px) {
+      .rail-result { grid-template-columns: 1fr; }
+      .rail { border-top: 1px solid var(--line); border-left: 0; }
+      .panel { width: calc(100vw - 24px); }
+      body { padding-inline: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Three nested-meaning variants, switchable via ?variant=A|B|C. Throwaway UI prototype. -->
+  <div class="prototype-note">PROTOTYPE · double-click một từ tiếng Anh để thử</div>
+
+  <section class="panel view" data-view="A">
+    <header class="topbar"><div class="brand">Insta Lingo</div><div class="spacer"></div><select class="select"><option>Simple English</option><option>Tiếng Việt</option></select><button class="icon-button">⚙︎</button><button class="icon-button">•••</button></header>
+    <main class="content">
+      <div class="query-row"><input class="query" value="scalable"><button class="primary">Tra nghĩa</button></div>
+      <div class="context-row"><button class="chip">Thông thường</button><button class="chip active">Phát triển phần mềm</button><button class="chip">Swift / iOS</button></div>
+      <section class="result"><div class="result-main" data-zone="A"></div></section>
+    </main>
+    <div class="state" data-state>A · primary=scalable · nested=none · presentation=anchored-peek</div>
+  </section>
+
+  <section class="panel view" data-view="B">
+    <header class="topbar"><div class="brand">Insta Lingo</div><div class="spacer"></div><select class="select"><option>Simple English</option><option>Tiếng Việt</option></select><button class="icon-button">⚙︎</button><button class="icon-button">•••</button></header>
+    <main class="content">
+      <div class="query-row"><input class="query" value="scalable"><button class="primary">Tra nghĩa</button></div>
+      <div class="context-row"><button class="chip">Thông thường</button><button class="chip active">Phát triển phần mềm</button><button class="chip">Swift / iOS</button></div>
+      <section class="result rail-result"><div class="result-main" data-zone="B"></div><aside class="rail"><div class="rail-title">Nghĩa nhanh</div><div class="rail-empty">Double-click một từ trong kết quả. Nghĩa phụ sẽ hiện ở đây và không thay đổi lượt tra hiện tại.</div><div class="rail-card" hidden><div class="mini-head"><span class="mini-term"></span><span class="mini-type"></span><button class="close" aria-label="Đóng">×</button></div><div class="mini-meaning"></div><div class="rail-divider"></div><div class="back-context">Đang xem trong ngữ cảnh của <strong>scalable</strong>.</div></div></aside></section>
+    </main>
+    <div class="state" data-state>B · primary=scalable · nested=none · presentation=meaning-rail</div>
+  </section>
+
+  <section class="panel view" data-view="C">
+    <header class="topbar"><div class="brand">Insta Lingo</div><div class="spacer"></div><select class="select"><option>Simple English</option><option>Tiếng Việt</option></select><button class="icon-button">⚙︎</button><button class="icon-button">•••</button></header>
+    <main class="content">
+      <div class="query-row"><input class="query" value="scalable"><button class="primary">Tra nghĩa</button></div>
+      <div class="context-row"><button class="chip">Thông thường</button><button class="chip active">Phát triển phần mềm</button><button class="chip">Swift / iOS</button></div>
+      <section class="result"><div class="result-main" data-zone="C"></div></section>
+    </main>
+    <div class="state" data-state>C · primary=scalable · nested=none · presentation=inline-thread</div>
+  </section>
+
+  <div class="peek" hidden><div class="mini-head"><span class="mini-term"></span><span class="mini-type"></span><button class="close" aria-label="Đóng">×</button></div><div class="mini-meaning"></div><div class="mini-note">Kết quả “scalable” vẫn được giữ nguyên</div></div>
+
+  <nav class="switcher" aria-label="Chuyển phương án prototype"><button data-direction="-1" aria-label="Phương án trước">←</button><div class="variant-label"></div><button data-direction="1" aria-label="Phương án sau">→</button></nav>
+
+  <script>
+    const definitions = {
+      handle: ['verb', 'xử lý hoặc giải quyết một việc'],
+      increasing: ['adjective', 'đang tăng lên về số lượng hoặc mức độ'],
+      demand: ['noun', 'nhu cầu; lượng công việc hoặc yêu cầu cần được đáp ứng'],
+      slowing: ['verb', 'trở nên chậm hơn'],
+      significant: ['adjective', 'đáng kể; đủ lớn để tạo ra khác biệt'],
+      redesign: ['noun', 'việc thiết kế lại một hệ thống hoặc sản phẩm'],
+      workload: ['noun', 'khối lượng công việc mà hệ thống phải xử lý']
+    };
+    const labels = { A: 'A — Popover cạnh từ', B: 'B — Meaning rail', C: 'C — Chèn dưới câu' };
+    const variants = Object.keys(labels);
+
+    function word(text) {
+      const key = text.toLowerCase().replace(/[^a-z]/g, '');
+      return definitions[key] ? `<span class="lookup-word" data-word="${key}" tabindex="0">${text}</span>` : text;
+    }
+    function sentence(parts) { return parts.map(word).join(' '); }
+    function resultMarkup(variant) {
+      const meaning = sentence(['Able', 'to', 'handle', 'an', 'increasing', 'workload', 'or', 'demand', 'without', 'a', 'significant', 'drop', 'in', 'performance', 'or', 'a', 'complete', 'redesign.']);
+      const example = sentence(['A', 'scalable', 'service', 'keeps', 'responding', 'quickly', 'even', 'when', 'demand', 'increases.']);
+      const inlineAfterMeaning = variant === 'C' ? '<div class="inline-slot" data-inline="meaning"></div>' : '';
+      const inlineAfterExample = variant === 'C' ? '<div class="inline-slot" data-inline="example"></div>' : '';
+      return `<div class="result-head"><div><div class="term">scalable</div><div class="phonetic">/ˈskeɪləbl/ · adjective</div></div><button class="save">☆ Yêu thích</button></div>
+        <div class="meaning" data-sentence="meaning">${meaning}</div>${inlineAfterMeaning}
+        <div class="translation">Có khả năng mở rộng để xử lý thêm công việc mà không giảm hiệu năng đáng kể hoặc phải thiết kế lại toàn bộ.</div>
+        <div class="example-block"><div class="example-label">Ví dụ</div><div class="example" data-sentence="example">${example}</div>${inlineAfterExample}</div>
+        <div class="hint"><span class="hint-icon">↖</span> Double-click một từ để xem nghĩa nhanh, không rời khỏi <strong>scalable</strong>.</div>
+        <div class="suggestions">Thử nhanh: <button data-suggest="demand">demand</button><button data-suggest="workload">workload</button><button data-suggest="significant">significant</button></div>`;
+    }
+
+    document.querySelectorAll('[data-zone]').forEach(zone => { zone.innerHTML = resultMarkup(zone.dataset.zone); });
+
+    function currentVariant() {
+      const value = new URLSearchParams(location.search).get('variant')?.toUpperCase();
+      return variants.includes(value) ? value : 'A';
+    }
+    function showVariant() {
+      const current = currentVariant();
+      document.querySelectorAll('.view').forEach(view => view.classList.toggle('active', view.dataset.view === current));
+      document.querySelector('.variant-label').textContent = labels[current];
+      closeNested();
+    }
+    function moveVariant(delta) {
+      const index = variants.indexOf(currentVariant());
+      const next = variants[(index + delta + variants.length) % variants.length];
+      const url = new URL(location.href);
+      url.searchParams.set('variant', next);
+      history.replaceState({}, '', url);
+      showVariant();
+    }
+    function updateState(variant, word = 'none') {
+      document.querySelector(`[data-view="${variant}"] [data-state]`).textContent = `${variant} · primary=scalable · nested=${word} · presentation=${variant === 'A' ? 'anchored-peek' : variant === 'B' ? 'meaning-rail' : 'inline-thread'}`;
+    }
+    function clearSelection(scope = document) { scope.querySelectorAll('.lookup-word.selected').forEach(item => item.classList.remove('selected')); }
+    function closeNested() {
+      clearSelection();
+      const peek = document.querySelector('.peek');
+      peek.hidden = true;
+      document.querySelectorAll('.rail-card').forEach(card => card.hidden = true);
+      document.querySelectorAll('.rail-empty').forEach(empty => empty.hidden = false);
+      document.querySelectorAll('.inline-slot').forEach(slot => { slot.classList.remove('open'); slot.innerHTML = ''; });
+      variants.forEach(variant => updateState(variant));
+    }
+    function openNested(target, key) {
+      const definition = definitions[key];
+      if (!definition) return;
+      const variant = currentVariant();
+      const view = document.querySelector(`[data-view="${variant}"]`);
+      clearSelection(view);
+      view.querySelectorAll(`[data-word="${key}"]`).forEach(item => item.classList.add('selected'));
+      if (variant === 'A') {
+        const peek = document.querySelector('.peek');
+        peek.querySelector('.mini-term').textContent = key;
+        peek.querySelector('.mini-type').textContent = definition[0];
+        peek.querySelector('.mini-meaning').textContent = definition[1];
+        const rect = target.getBoundingClientRect();
+        const left = Math.min(rect.left, window.innerWidth - 270);
+        peek.style.left = `${Math.max(12, left)}px`;
+        peek.style.top = `${Math.min(rect.bottom, window.innerHeight - 170)}px`;
+        peek.hidden = false;
+      } else if (variant === 'B') {
+        const rail = view.querySelector('.rail');
+        rail.querySelector('.rail-empty').hidden = true;
+        const card = rail.querySelector('.rail-card');
+        card.querySelector('.mini-term').textContent = key;
+        card.querySelector('.mini-type').textContent = definition[0];
+        card.querySelector('.mini-meaning').textContent = definition[1];
+        card.hidden = false;
+      } else {
+        const sentence = target.closest('[data-sentence]');
+        const slot = view.querySelector(`[data-inline="${sentence?.dataset.sentence || 'meaning'}"]`);
+        view.querySelectorAll('.inline-slot').forEach(item => { item.classList.remove('open'); item.innerHTML = ''; });
+        slot.innerHTML = `<div class="mini-head"><span class="inline-connector">↳</span><span class="mini-term">${key}</span><span class="mini-type">${definition[0]}</span><button class="close" aria-label="Đóng">×</button></div><div class="mini-meaning">${definition[1]}</div>`;
+        slot.classList.add('open');
+      }
+      updateState(variant, key);
+    }
+
+    document.addEventListener('dblclick', event => {
+      const target = event.target.closest('.lookup-word');
+      if (target) { event.preventDefault(); openNested(target, target.dataset.word); }
+    });
+    document.addEventListener('click', event => {
+      const direction = event.target.closest('[data-direction]');
+      if (direction) return moveVariant(Number(direction.dataset.direction));
+      const close = event.target.closest('.close');
+      if (close) return closeNested();
+      const suggestion = event.target.closest('[data-suggest]');
+      if (suggestion) {
+        const view = document.querySelector(`[data-view="${currentVariant()}"]`);
+        const target = view.querySelector(`[data-word="${suggestion.dataset.suggest}"]`);
+        if (target) openNested(target, suggestion.dataset.suggest);
+      }
+    });
+    document.addEventListener('keydown', event => {
+      const editing = event.target.matches('input, textarea, select, [contenteditable="true"]');
+      if (!editing && event.key === 'ArrowLeft') moveVariant(-1);
+      if (!editing && event.key === 'ArrowRight') moveVariant(1);
+      if (event.key === 'Escape') closeNested();
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.matches('.lookup-word')) openNested(event.target, event.target.dataset.word);
+    });
+    addEventListener('popstate', showVariant);
+    showVariant();
+  </script>
+</body>
+</html>

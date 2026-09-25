@@ -2,6 +2,9 @@ import AppKit
 import Carbon
 import LookupCore
 import Observation
+import OSLog
+
+private let hotkeyDebugLogger = Logger(subsystem: "com.k2tam.InstaLingo", category: "DEBUG-hotkey-7f3a")
 
 @MainActor @Observable
 final class GlobalHotkeyManager {
@@ -28,6 +31,7 @@ final class GlobalHotkeyManager {
         var type = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
         let pointer = Unmanaged.passUnretained(self).toOpaque()
         let status = InstallEventHandler(GetApplicationEventTarget(), globalHotkeyEventHandler, 1, &type, pointer, &eventHandler)
+        hotkeyDebugLogger.notice("[DEBUG-hotkey-7f3a] install handler status=\(status)")
         guard status == noErr else {
             for action in HotkeyAction.allCases { registrationErrors[action] = status }
             return
@@ -88,8 +92,10 @@ final class GlobalHotkeyManager {
     }
 
     fileprivate func dispatch(id: UInt32) {
+        hotkeyDebugLogger.notice("[DEBUG-hotkey-7f3a] dispatch id=\(id)")
         guard let action = HotkeyAction.allCases.first(where: { UInt32($0.index) == id }),
               references[action] != nil else { return }
+        hotkeyDebugLogger.notice("[DEBUG-hotkey-7f3a] action=\(String(describing: action))")
         onAction?(action)
     }
 
@@ -107,12 +113,14 @@ final class GlobalHotkeyManager {
         var reference: EventHotKeyRef?
         let id = EventHotKeyID(signature: OSType(0x5441474C), id: UInt32(action.index)) // TAGL
         let status = RegisterEventHotKey(UInt32(shortcut.keyCode), shortcut.carbonModifiers, id, GetApplicationEventTarget(), 0, &reference)
+        hotkeyDebugLogger.notice("[DEBUG-hotkey-7f3a] register action=\(String(describing: action)) key=\(shortcut.keyCode) modifiers=\(shortcut.carbonModifiers) status=\(status)")
         if status == noErr, let reference { references[action] = reference }
         return status
     }
 }
 
 private let globalHotkeyEventHandler: EventHandlerUPP = { _, event, userData in
+    hotkeyDebugLogger.notice("[DEBUG-hotkey-7f3a] carbon callback")
     guard let event, let userData else { return OSStatus(eventNotHandledErr) }
     var id = EventHotKeyID()
     let status = GetEventParameter(event, EventParamName(kEventParamDirectObject), EventParamType(typeEventHotKeyID), nil, MemoryLayout<EventHotKeyID>.size, nil, &id)
