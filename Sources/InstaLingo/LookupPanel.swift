@@ -398,6 +398,7 @@ private struct LookupStateRegion: View {
                 vietnamesePhase: lookup.vietnamesePhase,
                 isVietnameseExpanded: $isVietnameseExpanded,
                 loadVietnamese: { await lookup.loadVietnameseResult() },
+                loadQuickMeaning: { try await lookup.quickMeaning(for: $0) },
                 isExpanded: $isDetailExpanded,
                 isFavorite: isFavorite,
                 saveFavorite: {
@@ -501,6 +502,7 @@ private struct LookupResultView: View {
     let vietnamesePhase: LookupPhase
     @Binding var isVietnameseExpanded: Bool
     let loadVietnamese: () async -> Void
+    let loadQuickMeaning: (String) async throws -> LookupResult
     @Binding var isExpanded: Bool
     let isFavorite: Bool
     let saveFavorite: () -> Void
@@ -531,24 +533,56 @@ private struct LookupResultView: View {
                     .background(.quaternary, in: Capsule())
             }
 
-            Text(result.meaning)
-                .font(.title3.weight(.semibold))
-                .textSelection(.enabled)
+            if showsVietnamese {
+                QuickMeaningTextBlock(
+                    text: result.meaning,
+                    font: .systemFont(
+                        ofSize: NSFont.preferredFont(forTextStyle: .title3).pointSize,
+                        weight: .semibold
+                    ),
+                    color: .labelColor,
+                    primaryTerm: lookupText,
+                    strings: strings,
+                    loadMeaning: loadQuickMeaning
+                )
+            } else {
+                Text(result.meaning)
+                    .font(.title3.weight(.semibold))
+                    .textSelection(.enabled)
+            }
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(strings.resultExample)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.secondary)
                     .textCase(.uppercase)
-                Text(result.example)
-                    .foregroundStyle(.secondary)
-                    .textSelection(.enabled)
+                if showsVietnamese {
+                    QuickMeaningTextBlock(
+                        text: result.example,
+                        font: .preferredFont(forTextStyle: .body),
+                        color: .secondaryLabelColor,
+                        primaryTerm: lookupText,
+                        strings: strings,
+                        loadMeaning: loadQuickMeaning
+                    )
+                } else {
+                    Text(result.example)
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
             }
             .padding(.leading, 12)
             .overlay(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 1)
                     .fill(Color.accentColor.opacity(0.65))
                     .frame(width: 2)
+            }
+
+            if showsVietnamese {
+                Label(strings.quickMeaningHint(primary: lookupText), systemImage: "cursorarrow.click.2")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if showsVietnamese {
@@ -634,6 +668,155 @@ private struct LookupResultView: View {
         } else {
             withAnimation(.easeOut(duration: 0.15)) { isCopied = true }
         }
+    }
+}
+
+private struct QuickMeaningSelection: Identifiable, Equatable {
+    let id = UUID()
+    let word: String
+    let anchor: CGRect
+}
+
+private enum QuickMeaningPhase: Equatable {
+    case loading
+    case result(LookupResult)
+    case error(String)
+}
+
+private struct QuickMeaningTextBlock: View {
+    let text: String
+    let font: NSFont
+    let color: NSColor
+    let primaryTerm: String
+    let strings: UIStrings
+    let loadMeaning: (String) async throws -> LookupResult
+
+    @State private var selection: QuickMeaningSelection?
+    @State private var phase: QuickMeaningPhase = .loading
+
+    private var isPopoverPresented: Binding<Bool> {
+        Binding(
+            get: { selection != nil },
+            set: { presented in
+                if !presented { selection = nil }
+            }
+        )
+    }
+
+    var body: some View {
+        QuickMeaningText(
+            text: text,
+            font: font,
+            color: color,
+            isSelectionActive: selection != nil
+        ) { word, anchor in
+            phase = .loading
+            selection = QuickMeaningSelection(word: word, anchor: anchor)
+        }
+        .overlay(alignment: .topLeading) {
+            if let selection {
+                VStack(alignment: .leading, spacing: 0) {
+                    Color.clear
+                        .frame(height: max(selection.anchor.minY, 0))
+
+                    HStack(alignment: .top, spacing: 0) {
+                        Color.clear
+                            .frame(width: max(selection.anchor.minX, 0))
+
+                        Color.clear
+                            .frame(
+                                width: max(selection.anchor.width, 1),
+                                height: max(selection.anchor.height, 1)
+                            )
+                            .popover(
+                                isPresented: isPopoverPresented,
+                                attachmentAnchor: .rect(.bounds),
+                                arrowEdge: .top
+                            ) {
+                                QuickMeaningPopover(
+                                    word: selection.word,
+                                    primaryTerm: primaryTerm,
+                                    phase: phase,
+                                    strings: strings,
+                                    close: { self.selection = nil }
+                                )
+                            }
+
+                        Spacer(minLength: 0)
+                    }
+
+                    Spacer(minLength: 0)
+                }
+            }
+        }
+        .task(id: selection?.id) {
+            guard let selection else { return }
+            do {
+                let result = try await loadMeaning(selection.word)
+                guard self.selection?.id == selection.id else { return }
+                phase = .result(result)
+            } catch is CancellationError {
+                return
+            } catch {
+                guard self.selection?.id == selection.id else { return }
+                phase = .error(error.localizedDescription)
+            }
+        }
+    }
+}
+
+private struct QuickMeaningPopover: View {
+    let word: String
+    let primaryTerm: String
+    let phase: QuickMeaningPhase
+    let strings: UIStrings
+    let close: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Text(word)
+                    .font(.headline)
+                    .lineLimit(1)
+
+                Text(strings.quickMeaning)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+
+                Spacer(minLength: 12)
+
+                Button(action: close) {
+                    Image(systemName: "xmark")
+                        .accessibilityHidden(true)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .accessibilityLabel(strings.closeQuickMeaning)
+            }
+
+            switch phase {
+            case .loading:
+                ProgressView(strings.quickMeaningLoading)
+                    .controlSize(.small)
+            case .result(let result):
+                Text(result.meaning)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .textSelection(.enabled)
+            case .error(let message):
+                Label(strings.errorMessage(message), systemImage: "exclamationmark.triangle.fill")
+                    .font(.callout)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Text(strings.quickMeaningKeepsPrimary(primaryTerm))
+                .font(.caption2)
+                .foregroundStyle(.tint)
+        }
+        .padding(14)
+        .frame(width: 270, alignment: .leading)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("\(strings.quickMeaning): \(word)")
     }
 }
 

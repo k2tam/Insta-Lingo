@@ -8,6 +8,7 @@ struct QuickMeaningText: NSViewRepresentable {
     let text: String
     let font: NSFont
     let color: NSColor
+    let isSelectionActive: Bool
     let lookup: (String, CGRect) -> Void
 
     func makeNSView(context: Context) -> QuickMeaningTextView {
@@ -26,10 +27,15 @@ struct QuickMeaningText: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: QuickMeaningTextView, context: Context) {
-        nsView.string = text
+        if nsView.string != text {
+            nsView.string = text
+        }
         nsView.font = font
         nsView.textColor = color
         nsView.onWordLookup = lookup
+        if !isSelectionActive, nsView.selectedRange().length > 0 {
+            nsView.setSelectedRange(NSRange(location: 0, length: 0))
+        }
         nsView.invalidateIntrinsicContentSize()
     }
 

@@ -63,6 +63,21 @@ public struct UIStrings: Sendable {
     public var vietnameseExplanation: String { choose("Xem giải nghĩa tiếng Việt", "Show Vietnamese explanation") }
     public var loadingVietnamese: String { choose("Đang tra giải nghĩa tiếng Việt…", "Loading Vietnamese explanation…") }
     public var retryVietnamese: String { choose("Thử lại", "Retry") }
+    public var quickMeaning: String { choose("Nghĩa nhanh", "Quick meaning") }
+    public var quickMeaningLoading: String { choose("Đang tra nghĩa nhanh…", "Looking up a quick meaning…") }
+    public var closeQuickMeaning: String { choose("Đóng nghĩa nhanh", "Close quick meaning") }
+    public func quickMeaningHint(primary: String) -> String {
+        choose(
+            "Double-click một từ tiếng Anh để xem nghĩa nhanh, không rời khỏi \(primary).",
+            "Double-click an English word for a quick meaning without leaving \(primary)."
+        )
+    }
+    public func quickMeaningKeepsPrimary(_ primary: String) -> String {
+        choose(
+            "Kết quả “\(primary)” vẫn được giữ nguyên",
+            "The “\(primary)” result stays in place"
+        )
+    }
     public var moreActions: String { choose("Tác vụ khác", "More actions") }
     public var storageUnavailable: String { choose("Không thể lưu dữ liệu trên máy. Hãy kiểm tra dung lượng và quyền truy cập rồi thử lại.", "Could not save data on this Mac. Check storage space and permissions, then try again.") }
     public var newContext: String { choose("Ngữ cảnh mới…", "New context…") }

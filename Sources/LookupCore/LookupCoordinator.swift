@@ -207,6 +207,25 @@ public final class LookupCoordinator {
         }
     }
 
+    /// Resolves a temporary Vietnamese meaning without replacing or recording
+    /// the completed lookup currently shown in the panel.
+    public func quickMeaning(for text: String) async throws -> LookupResult {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard Self.isClearShortPhrase(trimmed) else {
+            throw LookupError.invalidPhrase
+        }
+
+        let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext)
+        let source = completedSource ?? selectedSource
+        if source == .groq {
+            guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
+            let apiKey = try groqConfiguration.keyForLookup()
+            return try await groq.lookup(request, to: .vietnamese, apiKey: apiKey)
+        }
+        guard let translator else { throw LookupError.translationUnavailable }
+        return try await translator.translate(request, to: .vietnamese)
+    }
+
     public static func isShortPhrase(_ text: String) -> Bool {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty, trimmed.count <= 32,
@@ -253,11 +272,14 @@ public final class LookupCoordinator {
 }
 
 private enum LookupError: LocalizedError {
+    case invalidPhrase
     case translationUnavailable
     case groqUnavailable
 
     var errorDescription: String? {
         switch self {
+        case .invalidPhrase:
+            "Select an English word or short phrase in the text before looking it up."
         case .translationUnavailable:
             "Local translation is unavailable on this Mac. Your lookup was not sent to another provider."
         case .groqUnavailable:
