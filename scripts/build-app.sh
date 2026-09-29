@@ -2,15 +2,18 @@
 set -eu
 
 project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-cd "$project_dir"
-if [ "$(xcode-select -p)" = /Library/Developer/CommandLineTools ] &&
-   [ -d /Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk ]; then
-    set -- --sdk /Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk
-else
-    set --
+if ! xcodebuild -version >/dev/null 2>&1; then
+    echo "Building the app requires full Xcode. Select it with xcode-select or set DEVELOPER_DIR." >&2
+    exit 1
 fi
-swift build "$@" -c release --product InstaLingo
-bin_dir=$(swift build "$@" -c release --show-bin-path)
-app_dir="$project_dir/build/Insta Lingo.app"
-sh "$project_dir/scripts/package-app.sh" "$bin_dir/InstaLingo" "$app_dir"
-echo "$app_dir"
+
+set --
+if [ -n "${CODE_SIGN_IDENTITY:-}" ]; then
+    set -- "CODE_SIGN_IDENTITY=$CODE_SIGN_IDENTITY"
+fi
+xcodebuild -project "$project_dir/InstaLingo.xcodeproj" \
+    -scheme InstaLingo -configuration Release -destination 'platform=macOS' \
+    -derivedDataPath "$project_dir/build/DerivedData" \
+    "CONFIGURATION_BUILD_DIR=$project_dir/build" "$@" build
+
+echo "$project_dir/build/Insta Lingo.app"

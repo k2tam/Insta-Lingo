@@ -1,10 +1,6 @@
 .build/
 build/
-.swiftpm/*
-!.swiftpm/xcode/
-.swiftpm/xcode/*
-!.swiftpm/xcode/xcshareddata/
-.swiftpm/xcode/xcshareddata/*
-!.swiftpm/xcode/xcshareddata/xcschemes/
-.swiftpm/xcode/xcshareddata/xcschemes/*
-!.swiftpm/xcode/xcshareddata/xcschemes/InstaLingo.xcscheme
+.swiftpm/
+DerivedData/
+xcuserdata/
+*.xcuserstate

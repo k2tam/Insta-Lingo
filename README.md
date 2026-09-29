@@ -4,15 +4,27 @@ A macOS menu bar app for quick lookups.
 
 ## Run from Xcode
 
-Open `Package.swift` in Xcode, select the shared **InstaLingo** scheme (not **InstaLingo-Package**) with **My Mac** as the destination, then choose **Product → Run** (⌘R). After each build, the shared scheme packages and signs `Insta Lingo.app`, closes the previous development instance, and launches the rebuilt bundle so macOS can retain Accessibility and Screen Recording grants. Building alone will not place an icon in the menu bar.
+Requires Xcode 26 or later and macOS 26 or later. Open `InstaLingo.xcodeproj`, select the shared **InstaLingo** scheme and **My Mac**, then choose **Product → Run** (⌘R). Xcode builds, signs, and launches the native app bundle with the debugger attached. **Product → Archive** creates an app archive.
+
+The project contains the **InstaLingo** app, the **LookupCore** static library, and **LookupCoreTests**. Source files are organized into Xcode groups with explicit target membership. When adding a Swift file, select its corresponding target in the File inspector. Run the tests with **Product → Test** (⌘U).
+
+Signing defaults to an installed **Apple Development** certificate. If needed, configure your team and signing identity under the app and test targets' **Signing & Capabilities** settings. Keep the same identity and bundle identifier (`com.k2tam.InstaLingo`) across rebuilds so macOS can recognize the app's permission grants.
 
 The app uses a book symbol in the menu bar and has no Dock icon. Click the menu bar symbol to open the lookup panel, or press ⌘⌥L.
 
 ## Build an app bundle
 
-Run `sh scripts/build-app.sh`, then open `build/Insta Lingo.app` in Finder. This bundle includes `App/Info.plist`, which marks Insta Lingo as a menu bar app.
+Run `sh scripts/build-app.sh`, then open `build/Insta Lingo.app` in Finder. The script uses the same native Xcode project in Release configuration. To select a particular certificate, pass `CODE_SIGN_IDENTITY` as an environment variable. The full Xcode installation must be selected with `xcode-select`, or supplied through `DEVELOPER_DIR`.
 
-For screen-region lookup, enable **Insta Lingo** in System Settings → Privacy & Security → Screen & System Audio Recording, then quit the app completely and reopen it. Grant Accessibility separately for selected-text lookup. Xcode Run and `build/Insta Lingo.app` are separate launch paths; use the same one after granting permission. Both build paths use an available Apple Development signing identity. If several are installed, set `CODESIGN_IDENTITY` to the SHA-1 hash of the identity you want to keep using (find it with `security find-identity -v -p codesigning`). Signing fails when no development identity is available instead of creating a build whose permission grant expires on the next rebuild. After switching from an older ad-hoc build, remove its stale entry in System Settings and grant each permission once to the signed build.
+For screen-region lookup, enable **Insta Lingo** in System Settings → Privacy & Security → Screen & System Audio Recording, then quit the app completely and reopen it. Grant Accessibility separately for selected-text lookup. Use the same app location after granting permission. After switching from an older ad-hoc build, remove its stale entry in System Settings and grant each permission once to the signed build.
+
+## Run tests from the command line
+
+The app, core library, and tests are all native targets in `InstaLingo.xcodeproj`. Run the test suite with:
+
+```sh
+xcodebuild -project InstaLingo.xcodeproj -scheme InstaLingo -destination 'platform=macOS' test
+```
 
 ## Groq
 

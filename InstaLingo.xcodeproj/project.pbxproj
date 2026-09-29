@@ -1,0 +1,633 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 71;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6136187D98ED943775D4EE8B /* libLookupCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A1854CCEEC6BD87536C3A197 /* libLookupCore.a */; };
+		E0D34935F2A3A2B92371F338 /* libLookupCore.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A1854CCEEC6BD87536C3A197 /* libLookupCore.a */; };
+		A11134DD4673A9EB37D77FA0 /* AppIdentityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 772A60F496F166BDCDCB69BE /* AppIdentityTests.swift */; };
+		2439AE3F51FF4357EC23DA8B /* GlobalHotkeyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E19B9792805423F003475065 /* GlobalHotkeyTests.swift */; };
+		85F00E5C362EC852BE82A1A2 /* GroqLookupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = ACC23BE0CA796CFD9ECB7BE2 /* GroqLookupTests.swift */; };
+		D0EDF3079DD209E9AF014876 /* LaunchAtLoginSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1A4060A2198228984583AB6 /* LaunchAtLoginSettingsTests.swift */; };
+		0771AF2A0A7A31A40F3C7DD2 /* LocalSourceIsolationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52CB251B968910B48768EB5 /* LocalSourceIsolationTests.swift */; };
+		14E5BB4503C930CDE6FB3D80 /* LookupFavoritesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 740E67D25D0C84DD3AA74395 /* LookupFavoritesTests.swift */; };
+		3AB4DB6D514B10FD2CA8CCB3 /* LookupHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51EBAC4DAA0F418B8B547B8 /* LookupHistoryTests.swift */; };
+		63AE21A3E87ABA342ABEB8AD /* ManualLookupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A82F5C3AA3AB10F9C25A956F /* ManualLookupTests.swift */; };
+		AD7FE1F9B2D886246C4C6338 /* OCRLookupFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B08A6589A3666B0E99B8FA8 /* OCRLookupFlowTests.swift */; };
+		9F4A9FF0F2FCD5AD4796F34F /* ProfessionalContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3CC9ECFB6EAB5910CE893CC /* ProfessionalContextTests.swift */; };
+		5A655FB1FCCCE17E8B0F485B /* ScreenCaptureRegionMappingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79DEF48AFB321EE39AAE2EBC /* ScreenCaptureRegionMappingTests.swift */; };
+		A9CEF0CE95C018176FD2867F /* SelectedContextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CED0FF1F283B2A33582679B /* SelectedContextTests.swift */; };
+		CA47CFACA3488AF53C532914 /* SelectionLookupFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68AC11EE9CC655AFB866BC7A /* SelectionLookupFlowTests.swift */; };
+		CCAE273B7C844D79929BB7FA /* TargetLanguageLookupTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9AA3A7EE0D23B46FD743F07 /* TargetLanguageLookupTests.swift */; };
+		9C5E4BD39384D47DB82B0222 /* UILanguageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701EA7E38CD32FCFBCFCF650 /* UILanguageTests.swift */; };
+		AE9BBE0CA8DA5CA744D5751D /* GlobalHotkeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE8076E43E119CF522EE2BF /* GlobalHotkeys.swift */; };
+		8B73244A60A1F7657BAF4F02 /* GroqLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = F77C53F2B5718548CB81734A /* GroqLookup.swift */; };
+		CBFCF78F506A2E9E7B55912B /* HotkeyUIStrings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A86223D69376B3F5D29EF33 /* HotkeyUIStrings.swift */; };
+		EAC2634760B1ABEA85B686BF /* LaunchAtLoginSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72767D939182769510412AD8 /* LaunchAtLoginSettings.swift */; };
+		CBE1F0019E776D40EB609187 /* LookupCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BEB4D28907C9BB85096D53D /* LookupCoordinator.swift */; };
+		B983BB0F8596D5B2A97C2D9E /* LookupFavorites.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44509FA22261AB41250DF683 /* LookupFavorites.swift */; };
+		E9B97D3CCF3EB376D63DD14A /* LookupHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A88AB65D9F6A0AF0AB408566 /* LookupHistory.swift */; };
+		807A3912D5BA6511F05E331D /* OCRLookupFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A37F0E4AF8A9ABE453ECBB /* OCRLookupFlow.swift */; };
+		434D8EF30F9A9501332D1160 /* ProfessionalContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3FB4EF8D01A993F1E35E1E5E /* ProfessionalContext.swift */; };
+		3303611742A0390BB3CB7C89 /* ScreenCaptureRegionMapping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299B725DB5DFA7678E67702A /* ScreenCaptureRegionMapping.swift */; };
+		B098B34CE1ECB83026715799 /* SelectedLookupText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D71933CB26474690A8D5ABC /* SelectedLookupText.swift */; };
+		032393EA59673C0B8DB88E5C /* SelectionLookupFlow.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF240D7AFFC33DBA5ABC91F0 /* SelectionLookupFlow.swift */; };
+		4DA6626373E1C44EFD5B056B /* UILanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2346772F1844608B7987B3C6 /* UILanguage.swift */; };
+		842962BA2C560F6DB635E8AB /* AccessibilitySelectedTextReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */; };
+		1979E4324C10A1BCDAB640A5 /* AppSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */; };
+		36E3C9AFA1ABBCD5BCD2271A /* FavoritesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */; };
+		23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */; };
+		1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */; };
+		C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */; };
+		286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */; };
+		D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */; };
+		66FCC831D2BBD15154E34546 /* HistoryWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9928D405F5995B91A09087C2 /* HistoryWindow.swift */; };
+		B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */; };
+		3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */; };
+		4DCF72C056C94718EF848ED2 /* LocalAppleTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */; };
+		1F95B210A9988CCDC60B5184 /* LocalFoundationExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */; };
+		F55C6114F179B7D2A060FBDB /* LookupPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903F482B300646750EC40616 /* LookupPanel.swift */; };
+		8CB05658A2ECE4F1698EEED8 /* MainAppLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322F544566D57A0468722B7E /* MainAppLoginService.swift */; };
+		97A76F4779D8D699B87FC8F3 /* ProfessionalContextPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */; };
+		B58743F1E0BA4796C42DEC2E /* QuickMeaningText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */; };
+		EED54488C954DEDDE46D154E /* ScreenRegionOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18B64E8AE193C16E8E51DE17 /* ScreenRegionOCR.swift */; };
+		CE9E955B0AAE88698BA65B03 /* StatusPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D45C692A80542ABA5EE5B76 /* StatusPanelController.swift */; };
+		535C2D96650D610A00C432A4 /* SupplementaryWindowsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E71115DB7A7289E65959D6 /* SupplementaryWindowsController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0943F8AD11F54E0BA93D3DC6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0D30107122EF3CA2E3F8613B;
+			remoteInfo = LookupCore;
+		};
+		C57BB0D3D13E6FBF812FDE9C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0D30107122EF3CA2E3F8613B;
+			remoteInfo = LookupCore;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0112DAE3F84CB4DF5179BE01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		551720D6BE67DB695BBD7FCA /* Insta Lingo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Insta Lingo.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6550B56F6C1E388C3A0B8F5F /* LookupCoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LookupCoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A1854CCEEC6BD87536C3A197 /* libLookupCore.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libLookupCore.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		772A60F496F166BDCDCB69BE /* AppIdentityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIdentityTests.swift; sourceTree = "<group>"; };
+		E19B9792805423F003475065 /* GlobalHotkeyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyTests.swift; sourceTree = "<group>"; };
+		ACC23BE0CA796CFD9ECB7BE2 /* GroqLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqLookupTests.swift; sourceTree = "<group>"; };
+		C1A4060A2198228984583AB6 /* LaunchAtLoginSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSettingsTests.swift; sourceTree = "<group>"; };
+		B52CB251B968910B48768EB5 /* LocalSourceIsolationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalSourceIsolationTests.swift; sourceTree = "<group>"; };
+		740E67D25D0C84DD3AA74395 /* LookupFavoritesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupFavoritesTests.swift; sourceTree = "<group>"; };
+		D51EBAC4DAA0F418B8B547B8 /* LookupHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupHistoryTests.swift; sourceTree = "<group>"; };
+		A82F5C3AA3AB10F9C25A956F /* ManualLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualLookupTests.swift; sourceTree = "<group>"; };
+		8B08A6589A3666B0E99B8FA8 /* OCRLookupFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRLookupFlowTests.swift; sourceTree = "<group>"; };
+		E3CC9ECFB6EAB5910CE893CC /* ProfessionalContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalContextTests.swift; sourceTree = "<group>"; };
+		79DEF48AFB321EE39AAE2EBC /* ScreenCaptureRegionMappingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCaptureRegionMappingTests.swift; sourceTree = "<group>"; };
+		8CED0FF1F283B2A33582679B /* SelectedContextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedContextTests.swift; sourceTree = "<group>"; };
+		68AC11EE9CC655AFB866BC7A /* SelectionLookupFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionLookupFlowTests.swift; sourceTree = "<group>"; };
+		A9AA3A7EE0D23B46FD743F07 /* TargetLanguageLookupTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetLanguageLookupTests.swift; sourceTree = "<group>"; };
+		701EA7E38CD32FCFBCFCF650 /* UILanguageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILanguageTests.swift; sourceTree = "<group>"; };
+		CBE8076E43E119CF522EE2BF /* GlobalHotkeys.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeys.swift; sourceTree = "<group>"; };
+		F77C53F2B5718548CB81734A /* GroqLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqLookup.swift; sourceTree = "<group>"; };
+		0A86223D69376B3F5D29EF33 /* HotkeyUIStrings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyUIStrings.swift; sourceTree = "<group>"; };
+		72767D939182769510412AD8 /* LaunchAtLoginSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSettings.swift; sourceTree = "<group>"; };
+		4BEB4D28907C9BB85096D53D /* LookupCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupCoordinator.swift; sourceTree = "<group>"; };
+		44509FA22261AB41250DF683 /* LookupFavorites.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupFavorites.swift; sourceTree = "<group>"; };
+		A88AB65D9F6A0AF0AB408566 /* LookupHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupHistory.swift; sourceTree = "<group>"; };
+		97A37F0E4AF8A9ABE453ECBB /* OCRLookupFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OCRLookupFlow.swift; sourceTree = "<group>"; };
+		3FB4EF8D01A993F1E35E1E5E /* ProfessionalContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalContext.swift; sourceTree = "<group>"; };
+		299B725DB5DFA7678E67702A /* ScreenCaptureRegionMapping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenCaptureRegionMapping.swift; sourceTree = "<group>"; };
+		5D71933CB26474690A8D5ABC /* SelectedLookupText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedLookupText.swift; sourceTree = "<group>"; };
+		AF240D7AFFC33DBA5ABC91F0 /* SelectionLookupFlow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionLookupFlow.swift; sourceTree = "<group>"; };
+		2346772F1844608B7987B3C6 /* UILanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILanguage.swift; sourceTree = "<group>"; };
+		C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySelectedTextReader.swift; sourceTree = "<group>"; };
+		60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsView.swift; sourceTree = "<group>"; };
+		EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesWindow.swift; sourceTree = "<group>"; };
+		77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
+		FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeySettingsView.swift; sourceTree = "<group>"; };
+		1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqKeychain.swift; sourceTree = "<group>"; };
+		DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqProvider.swift; sourceTree = "<group>"; };
+		4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqSettingsView.swift; sourceTree = "<group>"; };
+		9928D405F5995B91A09087C2 /* HistoryWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryWindow.swift; sourceTree = "<group>"; };
+		BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstaLingoApp.swift; sourceTree = "<group>"; };
+		2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSettingsView.swift; sourceTree = "<group>"; };
+		87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAppleTranslator.swift; sourceTree = "<group>"; };
+		FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFoundationExplainer.swift; sourceTree = "<group>"; };
+		903F482B300646750EC40616 /* LookupPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupPanel.swift; sourceTree = "<group>"; };
+		322F544566D57A0468722B7E /* MainAppLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppLoginService.swift; sourceTree = "<group>"; };
+		0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalContextPicker.swift; sourceTree = "<group>"; };
+		D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickMeaningText.swift; sourceTree = "<group>"; };
+		18B64E8AE193C16E8E51DE17 /* ScreenRegionOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenRegionOCR.swift; sourceTree = "<group>"; };
+		6D45C692A80542ABA5EE5B76 /* StatusPanelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusPanelController.swift; sourceTree = "<group>"; };
+		74E71115DB7A7289E65959D6 /* SupplementaryWindowsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementaryWindowsController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		4BFBA00E53178DADD1B2A45A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C858E45A8FA9FD5ABCAA74 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0D34935F2A3A2B92371F338 /* libLookupCore.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E812469D2F2BF6C3196948A7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6136187D98ED943775D4EE8B /* libLookupCore.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B28B7AF69320201D1CF206EB = {
+			isa = PBXGroup;
+			children = (
+				ACC3569C062CB4BB7B9CE432 /* LookupCore */,
+				748322C75721A0DF329FEEBE /* InstaLingo */,
+				CCA32527759DE281530250E0 /* LookupCoreTests */,
+				A7D8CE70846932FEE851CAD6 /* App */,
+				FBDC4F23F93125BBEEAE800C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FBDC4F23F93125BBEEAE800C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A1854CCEEC6BD87536C3A197 /* libLookupCore.a */,
+				551720D6BE67DB695BBD7FCA /* Insta Lingo.app */,
+				6550B56F6C1E388C3A0B8F5F /* LookupCoreTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CCA32527759DE281530250E0 /* LookupCoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				772A60F496F166BDCDCB69BE /* AppIdentityTests.swift */,
+				E19B9792805423F003475065 /* GlobalHotkeyTests.swift */,
+				ACC23BE0CA796CFD9ECB7BE2 /* GroqLookupTests.swift */,
+				C1A4060A2198228984583AB6 /* LaunchAtLoginSettingsTests.swift */,
+				B52CB251B968910B48768EB5 /* LocalSourceIsolationTests.swift */,
+				740E67D25D0C84DD3AA74395 /* LookupFavoritesTests.swift */,
+				D51EBAC4DAA0F418B8B547B8 /* LookupHistoryTests.swift */,
+				A82F5C3AA3AB10F9C25A956F /* ManualLookupTests.swift */,
+				8B08A6589A3666B0E99B8FA8 /* OCRLookupFlowTests.swift */,
+				E3CC9ECFB6EAB5910CE893CC /* ProfessionalContextTests.swift */,
+				79DEF48AFB321EE39AAE2EBC /* ScreenCaptureRegionMappingTests.swift */,
+				8CED0FF1F283B2A33582679B /* SelectedContextTests.swift */,
+				68AC11EE9CC655AFB866BC7A /* SelectionLookupFlowTests.swift */,
+				A9AA3A7EE0D23B46FD743F07 /* TargetLanguageLookupTests.swift */,
+				701EA7E38CD32FCFBCFCF650 /* UILanguageTests.swift */,
+			);
+			name = LookupCoreTests;
+			path = Tests/LookupCoreTests;
+			sourceTree = "<group>";
+		};
+		ACC3569C062CB4BB7B9CE432 /* LookupCore */ = {
+			isa = PBXGroup;
+			children = (
+				CBE8076E43E119CF522EE2BF /* GlobalHotkeys.swift */,
+				F77C53F2B5718548CB81734A /* GroqLookup.swift */,
+				0A86223D69376B3F5D29EF33 /* HotkeyUIStrings.swift */,
+				72767D939182769510412AD8 /* LaunchAtLoginSettings.swift */,
+				4BEB4D28907C9BB85096D53D /* LookupCoordinator.swift */,
+				44509FA22261AB41250DF683 /* LookupFavorites.swift */,
+				A88AB65D9F6A0AF0AB408566 /* LookupHistory.swift */,
+				97A37F0E4AF8A9ABE453ECBB /* OCRLookupFlow.swift */,
+				3FB4EF8D01A993F1E35E1E5E /* ProfessionalContext.swift */,
+				299B725DB5DFA7678E67702A /* ScreenCaptureRegionMapping.swift */,
+				5D71933CB26474690A8D5ABC /* SelectedLookupText.swift */,
+				AF240D7AFFC33DBA5ABC91F0 /* SelectionLookupFlow.swift */,
+				2346772F1844608B7987B3C6 /* UILanguage.swift */,
+			);
+			name = LookupCore;
+			path = Sources/LookupCore;
+			sourceTree = "<group>";
+		};
+		748322C75721A0DF329FEEBE /* InstaLingo */ = {
+			isa = PBXGroup;
+			children = (
+				C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */,
+				60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */,
+				EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */,
+				77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */,
+				FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */,
+				1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */,
+				DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */,
+				4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */,
+				9928D405F5995B91A09087C2 /* HistoryWindow.swift */,
+				BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */,
+				2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */,
+				87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */,
+				FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */,
+				903F482B300646750EC40616 /* LookupPanel.swift */,
+				322F544566D57A0468722B7E /* MainAppLoginService.swift */,
+				0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */,
+				D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */,
+				18B64E8AE193C16E8E51DE17 /* ScreenRegionOCR.swift */,
+				6D45C692A80542ABA5EE5B76 /* StatusPanelController.swift */,
+				74E71115DB7A7289E65959D6 /* SupplementaryWindowsController.swift */,
+			);
+			name = InstaLingo;
+			path = Sources/InstaLingo;
+			sourceTree = "<group>";
+		};
+		A7D8CE70846932FEE851CAD6 /* App */ = {isa = PBXGroup; children = (0112DAE3F84CB4DF5179BE01 /* Info.plist */,); path = App; sourceTree = "<group>"; };
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0D30107122EF3CA2E3F8613B /* LookupCore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1FD63D57A2C2D71FA432EBA7 /* Build configuration list for PBXNativeTarget "LookupCore" */;
+			buildPhases = (
+				343116094F34EABB95F76F52 /* Sources */,
+				4BFBA00E53178DADD1B2A45A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LookupCore;
+			productName = LookupCore;
+			productReference = A1854CCEEC6BD87536C3A197 /* libLookupCore.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		17689C6169CEB51E0A8C3D11 /* LookupCoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ABAEECCB8DE19EF215707B3A /* Build configuration list for PBXNativeTarget "LookupCoreTests" */;
+			buildPhases = (
+				091C1A4097553B94DAC5A0B3 /* Sources */,
+				E812469D2F2BF6C3196948A7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ECC66E2CB779948BCE5DBF1A /* PBXTargetDependency */,
+			);
+			name = LookupCoreTests;
+			productName = LookupCoreTests;
+			productReference = 6550B56F6C1E388C3A0B8F5F /* LookupCoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C2EA9DBCB136E9D67B71F4C0 /* InstaLingo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 501BBB637BE8C7C2FC0DCFB1 /* Build configuration list for PBXNativeTarget "InstaLingo" */;
+			buildPhases = (
+				CB8232A61BAAF98291978407 /* Sources */,
+				66C858E45A8FA9FD5ABCAA74 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F79E6B1AB90E7095F315C737 /* PBXTargetDependency */,
+			);
+			name = InstaLingo;
+			productName = InstaLingo;
+			productReference = 551720D6BE67DB695BBD7FCA /* Insta Lingo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98F54143AB4E86B28C3AFEE0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+			};
+			buildConfigurationList = 862894B703A6DEDF96A9DD6C /* Build configuration list for PBXProject "InstaLingo" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = B28B7AF69320201D1CF206EB;
+			productRefGroup = FBDC4F23F93125BBEEAE800C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0D30107122EF3CA2E3F8613B /* LookupCore */,
+				C2EA9DBCB136E9D67B71F4C0 /* InstaLingo */,
+				17689C6169CEB51E0A8C3D11 /* LookupCoreTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		091C1A4097553B94DAC5A0B3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A11134DD4673A9EB37D77FA0 /* AppIdentityTests.swift in Sources */,
+				2439AE3F51FF4357EC23DA8B /* GlobalHotkeyTests.swift in Sources */,
+				85F00E5C362EC852BE82A1A2 /* GroqLookupTests.swift in Sources */,
+				D0EDF3079DD209E9AF014876 /* LaunchAtLoginSettingsTests.swift in Sources */,
+				0771AF2A0A7A31A40F3C7DD2 /* LocalSourceIsolationTests.swift in Sources */,
+				14E5BB4503C930CDE6FB3D80 /* LookupFavoritesTests.swift in Sources */,
+				3AB4DB6D514B10FD2CA8CCB3 /* LookupHistoryTests.swift in Sources */,
+				63AE21A3E87ABA342ABEB8AD /* ManualLookupTests.swift in Sources */,
+				AD7FE1F9B2D886246C4C6338 /* OCRLookupFlowTests.swift in Sources */,
+				9F4A9FF0F2FCD5AD4796F34F /* ProfessionalContextTests.swift in Sources */,
+				5A655FB1FCCCE17E8B0F485B /* ScreenCaptureRegionMappingTests.swift in Sources */,
+				A9CEF0CE95C018176FD2867F /* SelectedContextTests.swift in Sources */,
+				CA47CFACA3488AF53C532914 /* SelectionLookupFlowTests.swift in Sources */,
+				CCAE273B7C844D79929BB7FA /* TargetLanguageLookupTests.swift in Sources */,
+				9C5E4BD39384D47DB82B0222 /* UILanguageTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		343116094F34EABB95F76F52 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE9BBE0CA8DA5CA744D5751D /* GlobalHotkeys.swift in Sources */,
+				8B73244A60A1F7657BAF4F02 /* GroqLookup.swift in Sources */,
+				CBFCF78F506A2E9E7B55912B /* HotkeyUIStrings.swift in Sources */,
+				EAC2634760B1ABEA85B686BF /* LaunchAtLoginSettings.swift in Sources */,
+				CBE1F0019E776D40EB609187 /* LookupCoordinator.swift in Sources */,
+				B983BB0F8596D5B2A97C2D9E /* LookupFavorites.swift in Sources */,
+				E9B97D3CCF3EB376D63DD14A /* LookupHistory.swift in Sources */,
+				807A3912D5BA6511F05E331D /* OCRLookupFlow.swift in Sources */,
+				434D8EF30F9A9501332D1160 /* ProfessionalContext.swift in Sources */,
+				3303611742A0390BB3CB7C89 /* ScreenCaptureRegionMapping.swift in Sources */,
+				B098B34CE1ECB83026715799 /* SelectedLookupText.swift in Sources */,
+				032393EA59673C0B8DB88E5C /* SelectionLookupFlow.swift in Sources */,
+				4DA6626373E1C44EFD5B056B /* UILanguage.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CB8232A61BAAF98291978407 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				842962BA2C560F6DB635E8AB /* AccessibilitySelectedTextReader.swift in Sources */,
+				1979E4324C10A1BCDAB640A5 /* AppSettingsView.swift in Sources */,
+				36E3C9AFA1ABBCD5BCD2271A /* FavoritesWindow.swift in Sources */,
+				23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */,
+				1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */,
+				C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */,
+				286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */,
+				D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */,
+				66FCC831D2BBD15154E34546 /* HistoryWindow.swift in Sources */,
+				B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */,
+				3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */,
+				4DCF72C056C94718EF848ED2 /* LocalAppleTranslator.swift in Sources */,
+				1F95B210A9988CCDC60B5184 /* LocalFoundationExplainer.swift in Sources */,
+				F55C6114F179B7D2A060FBDB /* LookupPanel.swift in Sources */,
+				8CB05658A2ECE4F1698EEED8 /* MainAppLoginService.swift in Sources */,
+				97A76F4779D8D699B87FC8F3 /* ProfessionalContextPicker.swift in Sources */,
+				B58743F1E0BA4796C42DEC2E /* QuickMeaningText.swift in Sources */,
+				EED54488C954DEDDE46D154E /* ScreenRegionOCR.swift in Sources */,
+				CE9E955B0AAE88698BA65B03 /* StatusPanelController.swift in Sources */,
+				535C2D96650D610A00C432A4 /* SupplementaryWindowsController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		ECC66E2CB779948BCE5DBF1A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0D30107122EF3CA2E3F8613B /* LookupCore */;
+			targetProxy = 0943F8AD11F54E0BA93D3DC6 /* PBXContainerItemProxy */;
+		};
+		F79E6B1AB90E7095F315C737 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0D30107122EF3CA2E3F8613B /* LookupCore */;
+			targetProxy = C57BB0D3D13E6FBF812FDE9C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1A313282A4791997F8AFE526 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				ENABLE_TESTABILITY = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = LookupCore;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		20F89F38D477BDB00DEF38EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				DEFINES_MODULE = YES;
+				PRODUCT_NAME = LookupCore;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		3B90BA7192FF99258A035732 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AUTOMATION_APPLE_EVENTS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = 29955KP3ZL;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_NAME = InstaLingo;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.k2tam.InstaLingo;
+				PRODUCT_MODULE_NAME = InstaLingo;
+				PRODUCT_NAME = "Insta Lingo";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		89E1FD6268CC0F221A2BE178 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_TESTABILITY = YES;
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		93C808852D2A30989D1B6B2C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				AUTOMATION_APPLE_EVENTS = NO;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				"DEVELOPMENT_TEAM[sdk=macosx*]" = 29955KP3ZL;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
+				EXECUTABLE_NAME = InstaLingo;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.k2tam.InstaLingo;
+				PRODUCT_MODULE_NAME = InstaLingo;
+				PRODUCT_NAME = "Insta Lingo";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		ADE8C513607ECD9D0F022F1B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.k2tam.InstaLingo.LookupCoreTests;
+				PRODUCT_NAME = LookupCoreTests;
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		B539015684BDD7B5E7CC5B46 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				ENABLE_TESTABILITY = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.k2tam.InstaLingo.LookupCoreTests;
+				PRODUCT_NAME = LookupCoreTests;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E6DE6C99132752C914FEF632 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				MACOSX_DEPLOYMENT_TARGET = 26.0;
+				SDKROOT = macosx;
+				SUPPORTED_PLATFORMS = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1FD63D57A2C2D71FA432EBA7 /* Build configuration list for PBXNativeTarget "LookupCore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A313282A4791997F8AFE526 /* Debug */,
+				20F89F38D477BDB00DEF38EB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		501BBB637BE8C7C2FC0DCFB1 /* Build configuration list for PBXNativeTarget "InstaLingo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3B90BA7192FF99258A035732 /* Debug */,
+				93C808852D2A30989D1B6B2C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		862894B703A6DEDF96A9DD6C /* Build configuration list for PBXProject "InstaLingo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				89E1FD6268CC0F221A2BE178 /* Debug */,
+				E6DE6C99132752C914FEF632 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ABAEECCB8DE19EF215707B3A /* Build configuration list for PBXNativeTarget "LookupCoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B539015684BDD7B5E7CC5B46 /* Debug */,
+				ADE8C513607ECD9D0F022F1B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 98F54143AB4E86B28C3AFEE0 /* Project object */;
+}

@@ -287,7 +287,9 @@ private struct LookupStateRegion: View {
     }
 
     private var stateTransition: AnyTransition {
-        reduceMotion ? .opacity : .opacity.combined(with: .scale(scale: 0.98, anchor: .top))
+        // Scaling a native ProgressView during preferred-content sizing can
+        // produce inconsistent AppKit minimum and maximum dimensions.
+        .opacity
     }
 
     var body: some View {
