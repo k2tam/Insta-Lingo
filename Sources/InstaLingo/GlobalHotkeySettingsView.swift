@@ -84,7 +84,7 @@ struct GlobalHotkeySettingsView: View {
     }
 }
 
-private extension HotkeyShortcut {
+extension HotkeyShortcut {
     init(event: NSEvent) {
         var modifiers: HotkeyModifiers = []
         if event.modifierFlags.contains(.command) { modifiers.insert(.command) }

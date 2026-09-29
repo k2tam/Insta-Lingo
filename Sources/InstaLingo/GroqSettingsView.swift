@@ -2,7 +2,8 @@ import Foundation
 import LookupCore
 import SwiftUI
 
-struct GroqSettingsView: View {
+/// Groq model and API key sections, shown inside the Lookup source form.
+struct GroqSettingsSections: View {
     private enum Field: Hashable {
         case apiKey
     }
@@ -15,7 +16,7 @@ struct GroqSettingsView: View {
     @FocusState private var focusedField: Field?
 
     var body: some View {
-        Form {
+        Group {
             Section {
                 Picker(strings.groqModel, selection: $configuration.model) {
                     ForEach(GroqModel.allCases) { model in
@@ -84,8 +85,5 @@ struct GroqSettingsView: View {
                 }
             }
         }
-        .formStyle(.grouped)
-        .padding()
-        .defaultFocus($focusedField, .apiKey)
     }
 }

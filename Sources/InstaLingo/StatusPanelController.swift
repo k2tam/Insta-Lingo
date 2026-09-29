@@ -8,6 +8,7 @@ final class StatusPanelController: NSObject {
     private let item: NSStatusItem
     private let popover = NSPopover()
     var onPresent: ((Bool) -> Void)?
+    var onOpen: (() -> Void)?
 
     override init() {
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -26,19 +27,22 @@ final class StatusPanelController: NSObject {
     }
 
     func show(focusInput: Bool = true) {
-        NSApp.activate(ignoringOtherApps: true)
-        present(focusInput: focusInput)
+        Task { await showAfterActivation(focusInput: focusInput) }
     }
 
-    /// The region overlay leaves another app active. Wait for AppKit to finish
-    /// activating us before presenting a transient popover, or it can close
-    /// immediately as an outside-app interaction.
     func showAfterRegionSelection() async {
+        await showAfterActivation(focusInput: false)
+    }
+
+    /// Global shortcuts and the region overlay leave another app active. Wait
+    /// for AppKit to finish activating us before presenting a transient
+    /// popover, or it closes immediately as an outside-app interaction.
+    func showAfterActivation(focusInput: Bool) async {
         NSApp.activate(ignoringOtherApps: true)
         for _ in 0..<50 where !NSApp.isActive {
             try? await Task.sleep(for: .milliseconds(20))
         }
-        present(focusInput: false)
+        present(focusInput: focusInput)
     }
 
     private func present(focusInput: Bool) {
@@ -52,6 +56,9 @@ final class StatusPanelController: NSObject {
     func hide() { popover.performClose(nil) }
 
     @objc private func togglePanel() {
-        if popover.isShown { hide() } else { show() }
+        if popover.isShown { hide() } else {
+            onOpen?()
+            show()
+        }
     }
 }

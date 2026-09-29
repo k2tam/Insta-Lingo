@@ -31,13 +31,17 @@ struct InstaLingoApp: App {
     @State private var supplementaryWindows: SupplementaryWindowsController
 
     init() {
+        // The redesign is dark only: the panel and windows use dark glass.
+        NSApplication.shared.appearance = NSAppearance(named: .darkAqua)
         let groqConfiguration = GroqConfiguration(credentials: GroqKeychain())
+        let groqProvider = GroqProvider(configuration: groqConfiguration)
+        groqProvider.warmUp()
         let history = LookupHistory()
         let favorites = LookupFavorites()
         let lookup = LookupCoordinator(
             explainer: LocalFoundationExplainer(),
             translator: LocalAppleTranslator(),
-            groq: GroqProvider(configuration: groqConfiguration),
+            groq: groqProvider,
             groqConfiguration: groqConfiguration,
             history: history
         )
@@ -53,6 +57,7 @@ struct InstaLingoApp: App {
         let loginSettings = LaunchAtLoginSettings(service: MainAppLoginService())
         let statusPanel = AppRuntime.statusPanel
         let panelState = PanelPresentationState()
+        statusPanel.onOpen = { groqProvider.warmUp() }
         statusPanel.onPresent = { shouldFocusInput in
             guard shouldFocusInput else { return }
             panelState.inputFocusGeneration += 1
@@ -65,6 +70,9 @@ struct InstaLingoApp: App {
                 selectionFlow: selectionFlow,
                 languageSettings: languageSettings,
                 favorites: favorites,
+                history: history,
+                hotkeys: hotkeys,
+                groqConfiguration: groqConfiguration,
                 isDetailExpanded: Binding(
                     get: { panelState.isDetailExpanded },
                     set: { panelState.isDetailExpanded = $0 }
@@ -89,19 +97,30 @@ struct InstaLingoApp: App {
                     ))
                 }
             )
-            .frame(width: 680)
+            .frame(width: 480)
         ))
+
+        supplementaryWindows.lookUpAgain = { [weak statusPanel] text in
+            selectionFlow.reset()
+            ocrFlow.cancelReview()
+            lookup.text = text
+            statusPanel?.show(focusInput: false)
+            Task { await lookup.submit() }
+        }
 
         hotkeys.onAction = { [weak statusPanel] action in
             switch action {
             case .openPanel:
+                groqProvider.warmUp()
                 statusPanel?.show()
             case .selectedText:
                 // Read before activating our popover. Some source apps clear
                 // their selection as soon as another application takes focus.
                 Task {
-                    await selectionFlow.start(lookup: lookup)
-                    statusPanel?.show(focusInput: false)
+                    await selectionFlow.start(lookup: lookup, onSelectionRead: {
+                        Task { await statusPanel?.showAfterActivation(focusInput: false) }
+                    })
+                    await statusPanel?.showAfterActivation(focusInput: false)
                 }
             case .screenRegion:
                 selectionFlow.reset()

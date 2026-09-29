@@ -43,10 +43,15 @@ struct LocalAppleTranslator: LocalTranslating {
         let meaning: String
         let example: String
         do {
-            let meaningResponse = try await session.translate(englishMeaning)
-            let exampleResponse = try await session.translate(englishExample)
-            meaning = meaningResponse.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
-            example = exampleResponse.targetText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let responses = try await session.translations(from: [
+                .init(sourceText: englishMeaning, clientIdentifier: "meaning"),
+                .init(sourceText: englishExample, clientIdentifier: "example"),
+            ])
+            let byID = Dictionary(responses.compactMap { response in
+                response.clientIdentifier.map { ($0, response.targetText) }
+            }, uniquingKeysWith: { first, _ in first })
+            meaning = (byID["meaning"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            example = (byID["example"] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
             throw LocalTranslationError.translationFailed
         }

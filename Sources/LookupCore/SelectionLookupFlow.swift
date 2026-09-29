@@ -35,7 +35,9 @@ public final class SelectionLookupFlow {
         self.reader = reader
     }
 
-    public func start(lookup: LookupCoordinator) async {
+    /// `onSelectionRead` runs right after the selection is stored and before the lookup
+    /// is awaited, so callers can show UI while the request is in flight.
+    public func start(lookup: LookupCoordinator, onSelectionRead: @MainActor () -> Void = {}) async {
         guard status != .reading else { return }
         status = .reading
         errorMessage = nil
@@ -47,6 +49,7 @@ public final class SelectionLookupFlow {
                 return
             }
             lookup.text = selected
+            onSelectionRead()
             if !LookupCoordinator.isClearShortPhrase(selected) {
                 status = .reviewing
             } else {

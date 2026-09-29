@@ -5,64 +5,56 @@ struct ProfessionalContextPicker: View {
     let catalog: ProfessionalContextCatalog
     let strings: UIStrings
     @State private var isCreating = false
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var isHovered = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(strings.professionalContext)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            ScrollView(.horizontal) {
-                HStack(spacing: 8) {
-                    ForEach(catalog.visibleContexts) { context in
-                        let isSelected = context.id == catalog.selectedContext.id
-                        Button {
-                            if reduceMotion {
-                                catalog.select(id: context.id)
-                            } else {
-                                withAnimation(.easeOut(duration: 0.15)) {
-                                    catalog.select(id: context.id)
-                                }
-                            }
-                        } label: {
-                            HStack(spacing: 5) {
-                                if isSelected {
-                                    Image(systemName: "checkmark")
-                                        .font(.caption.weight(.bold))
-                                        .accessibilityHidden(true)
-                                        .transition(.opacity.combined(with: .scale(scale: 0.8)))
-                                }
-                                Text(strings.contextName(id: context.id, customName: context.name))
-                                    .lineLimit(1)
-                            }
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .foregroundStyle(isSelected ? Color.white : Color.primary)
-                                .background(isSelected ? Color.accentColor : Color(nsColor: .controlBackgroundColor), in: Capsule())
-                                .overlay {
-                                    Capsule()
-                                        .stroke(isSelected ? Color.accentColor : Color(nsColor: .separatorColor), lineWidth: 1)
-                                }
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel(strings.professionalContextAccessibility(strings.contextName(id: context.id, customName: context.name)))
-                        .accessibilityAddTraits(isSelected ? .isSelected : [])
-                        .animation(reduceMotion ? nil : .easeOut(duration: 0.15), value: isSelected)
-                    }
-
-                    Button(strings.newContext, systemImage: "plus") {
-                        isCreating = true
-                    }
-                    .buttonStyle(.bordered)
-                    .buttonBorderShape(.capsule)
-                }
+        Menu {
+            ForEach(catalog.visibleContexts) { context in
+                let name = strings.contextName(id: context.id, customName: context.name)
+                Toggle(name, isOn: Binding(
+                    get: { context.id == catalog.selectedContext.id },
+                    set: { _ in catalog.select(id: context.id) }
+                ))
+                .help(strings.contextDescription(id: context.id, customDescription: context.description))
             }
-            .scrollIndicators(.hidden)
+            Divider()
+            Button(strings.newContext, systemImage: "plus") { isCreating = true }
+        } label: {
+            HStack(spacing: 5) {
+                Image(systemName: "briefcase")
+                    .font(.system(size: 10.5, weight: .medium))
+                    .foregroundStyle(Theme.textSecondary)
+                Text(selectedName)
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.textPrimary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.system(size: 8.5, weight: .semibold))
+                    .foregroundStyle(Theme.textSecondary)
+            }
+            .padding(.horizontal, 10)
+            .frame(height: 24)
+            .background(Theme.control, in: Capsule())
+            .overlay {
+                Capsule().strokeBorder(Color.white.opacity(isHovered ? 0.25 : 0.12))
+            }
+            .contentShape(Capsule())
         }
+        .menuStyle(.button)
+        .buttonStyle(.plain)
+        .menuIndicator(.hidden)
+        .onHover { isHovered = $0 }
+        .help(strings.contextDescription(id: catalog.selectedContext.id, customDescription: catalog.selectedContext.description))
+        .accessibilityLabel(strings.professionalContext)
+        .accessibilityValue(selectedName)
         .sheet(isPresented: $isCreating) {
             ProfessionalContextEditor(catalog: catalog, strings: strings, context: nil)
         }
+    }
+
+    private var selectedName: String {
+        strings.contextName(id: catalog.selectedContext.id, customName: catalog.selectedContext.name)
     }
 }
 

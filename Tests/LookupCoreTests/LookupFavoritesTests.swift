@@ -46,6 +46,20 @@ func clearingHistoryKeepsFavoritesAfterRestart() throws {
     #expect(reopenedFavorites.entries[0].result == result)
 }
 
+@Test @MainActor
+func unsavingFromThePanelRemovesOnlyTheMatchingFavorite() throws {
+    let favorites = LookupFavorites(fileURL: favoritesFixture())
+    let result = LookupResult(meaning: "diễn viên", example: "The actor bowed.", detail: "")
+    try favorites.save(text: "actor", targetLanguage: .vietnamese, context: .general, result: result)
+    try favorites.save(text: "actor", targetLanguage: .simpleEnglish, context: .general, result: result)
+
+    let saved = try #require(favorites.entry(text: " Actor ", targetLanguage: .vietnamese, context: .general))
+    try favorites.remove(id: saved.id)
+
+    #expect(!favorites.contains(text: "actor", targetLanguage: .vietnamese, context: .general))
+    #expect(favorites.contains(text: "actor", targetLanguage: .simpleEnglish, context: .general))
+}
+
 private func favoritesFixture() -> URL {
     FileManager.default.temporaryDirectory
         .appendingPathComponent("InstaLingo-FavoritesTests-\(UUID().uuidString)", isDirectory: true)

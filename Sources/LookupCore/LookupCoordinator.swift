@@ -114,6 +114,7 @@ public final class LookupCoordinator {
     @ObservationIgnored private let preferences: UserDefaults
     @ObservationIgnored private var requestGeneration = 0
     @ObservationIgnored private var completedSource: LookupSource?
+    @ObservationIgnored private var cache = LookupResultCache(capacity: 200)
     private static let languageKey = "lookup.targetLanguage"
 
     public init(explainer: any LocalExplaining, translator: (any LocalTranslating)? = nil, groq: (any GroqLookupProviding)? = nil, groqConfiguration: GroqConfiguration? = nil, history: LookupHistory? = nil, preferences: UserDefaults = .standard, contextCatalog: ProfessionalContextCatalog? = nil) {
@@ -156,18 +157,7 @@ public final class LookupCoordinator {
         let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext)
         let target = selectedLanguage
         do {
-            let resolved: LookupResult
-            if source == .groq {
-                guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
-                let apiKey = try groqConfiguration.keyForLookup()
-                resolved = try await groq.lookup(request, to: target, apiKey: apiKey)
-            } else if target.isSimpleEnglish {
-                resolved = try await explainer.explain(request)
-            } else if let translator {
-                resolved = try await translator.translate(request, to: target)
-            } else {
-                throw LookupError.translationUnavailable
-            }
+            let resolved = try await resolve(request, to: target, source: source, depth: .full)
             guard generation == requestGeneration else { return }
             result = resolved
             phase = .result
@@ -188,16 +178,7 @@ public final class LookupCoordinator {
         let generation = requestGeneration
         vietnamesePhase = .loading
         do {
-            let resolved: LookupResult
-            if source == .groq {
-                guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
-                let apiKey = try groqConfiguration.keyForLookup()
-                resolved = try await groq.lookup(completedLookup.request, to: .vietnamese, apiKey: apiKey)
-            } else if let translator {
-                resolved = try await translator.translate(completedLookup.request, to: .vietnamese)
-            } else {
-                throw LookupError.translationUnavailable
-            }
+            let resolved = try await resolve(completedLookup.request, to: .vietnamese, source: source, depth: .full)
             guard generation == requestGeneration else { return }
             vietnameseResult = resolved
             vietnamesePhase = .result
@@ -217,13 +198,30 @@ public final class LookupCoordinator {
 
         let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext)
         let source = completedSource ?? selectedSource
+        return try await resolve(request, to: .vietnamese, source: source, depth: .quick)
+    }
+
+    /// Serves repeat lookups from memory; only successful results are cached.
+    private func resolve(_ request: LookupRequest, to target: TargetLanguage, source: LookupSource, depth: LookupDepth) async throws -> LookupResult {
+        let key = LookupResultCache.Key(
+            text: request.text.lowercased(), contextID: request.context.id,
+            target: target.code, source: source, depth: depth
+        )
+        if let cached = cache.value(for: key) { return cached }
+        let resolved: LookupResult
         if source == .groq {
             guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
             let apiKey = try groqConfiguration.keyForLookup()
-            return try await groq.lookup(request, to: .vietnamese, apiKey: apiKey)
+            resolved = try await groq.lookup(request, to: target, apiKey: apiKey, depth: depth)
+        } else if target.isSimpleEnglish {
+            resolved = try await explainer.explain(request)
+        } else if let translator {
+            resolved = try await translator.translate(request, to: target)
+        } else {
+            throw LookupError.translationUnavailable
         }
-        guard let translator else { throw LookupError.translationUnavailable }
-        return try await translator.translate(request, to: .vietnamese)
+        cache.insert(resolved, for: key)
+        return resolved
     }
 
     public static func isShortPhrase(_ text: String) -> Bool {
@@ -285,5 +283,43 @@ private enum LookupError: LocalizedError {
         case .groqUnavailable:
             "Groq is not configured for this app."
         }
+    }
+}
+
+/// Small in-memory LRU keyed by everything that changes a lookup's answer.
+private struct LookupResultCache {
+    struct Key: Hashable {
+        let text: String
+        let contextID: String
+        let target: String
+        let source: LookupSource
+        let depth: LookupDepth
+    }
+
+    let capacity: Int
+    private var storage: [Key: LookupResult] = [:]
+    private var order: [Key] = []
+
+    init(capacity: Int) {
+        self.capacity = capacity
+    }
+
+    mutating func value(for key: Key) -> LookupResult? {
+        guard let value = storage[key] else { return nil }
+        touch(key)
+        return value
+    }
+
+    mutating func insert(_ value: LookupResult, for key: Key) {
+        storage[key] = value
+        touch(key)
+        while order.count > capacity {
+            storage[order.removeFirst()] = nil
+        }
+    }
+
+    private mutating func touch(_ key: Key) {
+        order.removeAll { $0 == key }
+        order.append(key)
     }
 }

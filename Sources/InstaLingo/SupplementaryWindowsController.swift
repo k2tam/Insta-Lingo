@@ -9,9 +9,11 @@ final class SupplementaryWindowsController {
     private let history: LookupHistory
     private let favorites: LookupFavorites
     private let languageSettings: UILanguageSettings
-    private var historyWindow: NSWindow?
-    private var favoritesWindow: NSWindow?
+    private let libraryNavigation = LibraryNavigation()
+    private var libraryWindow: NSWindow?
     private var settingsWindow: NSWindow?
+    /// Runs a word from the library through the lookup panel again.
+    var lookUpAgain: (String) -> Void = { _ in }
 
     init(history: LookupHistory, favorites: LookupFavorites,
          languageSettings: UILanguageSettings) {
@@ -20,40 +22,49 @@ final class SupplementaryWindowsController {
         self.languageSettings = languageSettings
     }
 
-    func showHistory() {
-        if historyWindow == nil {
-            historyWindow = makeWindow(
-                content: HistoryWindow(history: history, languageSettings: languageSettings)
-            )
-        }
-        show(historyWindow, title: languageSettings.strings.history)
-    }
+    func showHistory() { showLibrary(tab: .all) }
 
-    func showFavorites() {
-        if favoritesWindow == nil {
-            favoritesWindow = makeWindow(
-                content: FavoritesWindow(favorites: favorites, languageSettings: languageSettings)
+    func showFavorites() { showLibrary(tab: .favorites) }
+
+    private func showLibrary(tab: LibraryTab) {
+        libraryNavigation.tab = tab
+        libraryNavigation.isReviewing = false
+        if libraryWindow == nil {
+            libraryWindow = makeWindow(
+                content: LibraryWindow(
+                    history: history,
+                    favorites: favorites,
+                    navigation: libraryNavigation,
+                    languageSettings: languageSettings,
+                    lookUpAgain: { [weak self] in self?.lookUpAgain($0) }
+                ),
+                size: NSSize(width: 860, height: 560)
             )
         }
-        show(favoritesWindow, title: languageSettings.strings.favorites)
+        show(libraryWindow, title: languageSettings.strings.library)
     }
 
     func showSettings<Content: View>(content: Content) {
         if settingsWindow == nil {
-            settingsWindow = makeWindow(content: content)
-            settingsWindow?.contentMinSize = NSSize(width: 640, height: 420)
+            settingsWindow = makeWindow(content: content, size: NSSize(width: 700, height: 500))
+            settingsWindow?.contentMinSize = NSSize(width: 620, height: 420)
         }
         show(settingsWindow, title: languageSettings.strings.settingsTitle)
     }
 
-    private func makeWindow<Content: View>(content: Content) -> NSWindow {
+    private func makeWindow<Content: View>(content: Content, size: NSSize) -> NSWindow {
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 760, height: 500),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable],
+            contentRect: NSRect(origin: .zero, size: size),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
-        window.contentViewController = NSHostingController(rootView: content)
+        let hosting = NSHostingController(rootView: content)
+        hosting.sceneBridgingOptions = [.toolbars]
+        window.contentViewController = hosting
+        window.setContentSize(size)
+        window.appearance = NSAppearance(named: .darkAqua)
+        window.toolbarStyle = .unified
         window.isReleasedWhenClosed = false
         window.collectionBehavior.insert(.moveToActiveSpace)
         window.center()

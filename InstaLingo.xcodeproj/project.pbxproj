@@ -39,18 +39,20 @@
 		4DA6626373E1C44EFD5B056B /* UILanguage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2346772F1844608B7987B3C6 /* UILanguage.swift */; };
 		842962BA2C560F6DB635E8AB /* AccessibilitySelectedTextReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */; };
 		1979E4324C10A1BCDAB640A5 /* AppSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */; };
-		36E3C9AFA1ABBCD5BCD2271A /* FavoritesWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */; };
+		36E3C9AFA1ABBCD5BCD2271A /* ReviewFavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBDD01C1A5A46DBB8CE10FEE /* ReviewFavoritesView.swift */; };
 		23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */; };
 		1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */; };
 		C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */; };
 		286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */; };
 		D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */; };
-		66FCC831D2BBD15154E34546 /* HistoryWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9928D405F5995B91A09087C2 /* HistoryWindow.swift */; };
+		66FCC831D2BBD15154E34546 /* LibraryWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9928D405F5995B91A09087C2 /* LibraryWindow.swift */; };
 		B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */; };
 		3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */; };
 		4DCF72C056C94718EF848ED2 /* LocalAppleTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */; };
 		1F95B210A9988CCDC60B5184 /* LocalFoundationExplainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */; };
 		F55C6114F179B7D2A060FBDB /* LookupPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 903F482B300646750EC40616 /* LookupPanel.swift */; };
+		6B8EE5BB39A04719BA2C17CD /* LookupResultCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43AE3A5FE74D4F698D32C212 /* LookupResultCard.swift */; };
+		058BB961B0624732BB51B48F /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38046240AEC3411DB6842D75 /* Theme.swift */; };
 		8CB05658A2ECE4F1698EEED8 /* MainAppLoginService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322F544566D57A0468722B7E /* MainAppLoginService.swift */; };
 		97A76F4779D8D699B87FC8F3 /* ProfessionalContextPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */; };
 		B58743F1E0BA4796C42DEC2E /* QuickMeaningText.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */; };
@@ -111,18 +113,20 @@
 		2346772F1844608B7987B3C6 /* UILanguage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UILanguage.swift; sourceTree = "<group>"; };
 		C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessibilitySelectedTextReader.swift; sourceTree = "<group>"; };
 		60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettingsView.swift; sourceTree = "<group>"; };
-		EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesWindow.swift; sourceTree = "<group>"; };
+		EBDD01C1A5A46DBB8CE10FEE /* ReviewFavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewFavoritesView.swift; sourceTree = "<group>"; };
 		77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 		FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeySettingsView.swift; sourceTree = "<group>"; };
 		1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqKeychain.swift; sourceTree = "<group>"; };
 		DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqProvider.swift; sourceTree = "<group>"; };
 		4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqSettingsView.swift; sourceTree = "<group>"; };
-		9928D405F5995B91A09087C2 /* HistoryWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryWindow.swift; sourceTree = "<group>"; };
+		9928D405F5995B91A09087C2 /* LibraryWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindow.swift; sourceTree = "<group>"; };
 		BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstaLingoApp.swift; sourceTree = "<group>"; };
 		2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSettingsView.swift; sourceTree = "<group>"; };
 		87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalAppleTranslator.swift; sourceTree = "<group>"; };
 		FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFoundationExplainer.swift; sourceTree = "<group>"; };
 		903F482B300646750EC40616 /* LookupPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupPanel.swift; sourceTree = "<group>"; };
+		43AE3A5FE74D4F698D32C212 /* LookupResultCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LookupResultCard.swift; sourceTree = "<group>"; };
+		38046240AEC3411DB6842D75 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		322F544566D57A0468722B7E /* MainAppLoginService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainAppLoginService.swift; sourceTree = "<group>"; };
 		0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfessionalContextPicker.swift; sourceTree = "<group>"; };
 		D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickMeaningText.swift; sourceTree = "<group>"; };
@@ -228,18 +232,20 @@
 			children = (
 				C99006C0EDE9FB9B2CB74212 /* AccessibilitySelectedTextReader.swift */,
 				60DEFAC97A12A772C23ADCA2 /* AppSettingsView.swift */,
-				EBDD01C1A5A46DBB8CE10FEE /* FavoritesWindow.swift */,
+				EBDD01C1A5A46DBB8CE10FEE /* ReviewFavoritesView.swift */,
 				77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */,
 				FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */,
 				1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */,
 				DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */,
 				4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */,
-				9928D405F5995B91A09087C2 /* HistoryWindow.swift */,
+				9928D405F5995B91A09087C2 /* LibraryWindow.swift */,
 				BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */,
 				2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */,
 				87EE29BB3370AE6BE2132D32 /* LocalAppleTranslator.swift */,
 				FEA17763FB7C044B794BA01F /* LocalFoundationExplainer.swift */,
 				903F482B300646750EC40616 /* LookupPanel.swift */,
+				43AE3A5FE74D4F698D32C212 /* LookupResultCard.swift */,
+				38046240AEC3411DB6842D75 /* Theme.swift */,
 				322F544566D57A0468722B7E /* MainAppLoginService.swift */,
 				0CAF7C7CBCE4AEE706FB8F61 /* ProfessionalContextPicker.swift */,
 				D2532E75368FA84EA00583E3 /* QuickMeaningText.swift */,
@@ -383,18 +389,20 @@
 			files = (
 				842962BA2C560F6DB635E8AB /* AccessibilitySelectedTextReader.swift in Sources */,
 				1979E4324C10A1BCDAB640A5 /* AppSettingsView.swift in Sources */,
-				36E3C9AFA1ABBCD5BCD2271A /* FavoritesWindow.swift in Sources */,
+				36E3C9AFA1ABBCD5BCD2271A /* ReviewFavoritesView.swift in Sources */,
 				23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */,
 				1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */,
 				C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */,
 				286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */,
 				D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */,
-				66FCC831D2BBD15154E34546 /* HistoryWindow.swift in Sources */,
+				66FCC831D2BBD15154E34546 /* LibraryWindow.swift in Sources */,
 				B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */,
 				3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */,
 				4DCF72C056C94718EF848ED2 /* LocalAppleTranslator.swift in Sources */,
 				1F95B210A9988CCDC60B5184 /* LocalFoundationExplainer.swift in Sources */,
 				F55C6114F179B7D2A060FBDB /* LookupPanel.swift in Sources */,
+				6B8EE5BB39A04719BA2C17CD /* LookupResultCard.swift in Sources */,
+				058BB961B0624732BB51B48F /* Theme.swift in Sources */,
 				8CB05658A2ECE4F1698EEED8 /* MainAppLoginService.swift in Sources */,
 				97A76F4779D8D699B87FC8F3 /* ProfessionalContextPicker.swift in Sources */,
 				B58743F1E0BA4796C42DEC2E /* QuickMeaningText.swift in Sources */,

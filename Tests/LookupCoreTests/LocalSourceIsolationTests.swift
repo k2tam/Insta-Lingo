@@ -44,7 +44,7 @@ private struct EmptyGroqCredentials: GroqCredentialStoring {
 private final class IsolationRecordingGroq: GroqLookupProviding {
     var requests: [LookupRequest] = []
 
-    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String) async throws -> LookupResult {
+    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String, depth: LookupDepth) async throws -> LookupResult {
         requests.append(request)
         return LookupResult(meaning: "groq", example: "example", detail: "")
     }

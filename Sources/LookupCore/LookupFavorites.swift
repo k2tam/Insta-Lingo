@@ -60,7 +60,13 @@ public final class LookupFavorites {
 
     public func contains(text: String, targetLanguage: TargetLanguage,
                          context: ProfessionalContext) -> Bool {
-        entries.contains { matches($0, text: text, targetLanguage: targetLanguage, context: context) }
+        entry(text: text, targetLanguage: targetLanguage, context: context) != nil
+    }
+
+    /// The saved favorite for this word, target language and context, if any.
+    public func entry(text: String, targetLanguage: TargetLanguage,
+                      context: ProfessionalContext) -> LookupFavorite? {
+        entries.first { matches($0, text: text, targetLanguage: targetLanguage, context: context) }
     }
 
     /// Saving the same word, target language and context updates that favorite

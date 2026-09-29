@@ -32,9 +32,21 @@ public enum GroqReasoningEffort: String, CaseIterable, Identifiable, Sendable {
     public var id: String { rawValue }
 }
 
+/// `.quick` asks only for a short meaning and always uses the small, fast model.
+public enum LookupDepth: Hashable, Sendable {
+    case full
+    case quick
+}
+
 @MainActor
 public protocol GroqLookupProviding {
-    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String) async throws -> LookupResult
+    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String, depth: LookupDepth) async throws -> LookupResult
+}
+
+public extension GroqLookupProviding {
+    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String) async throws -> LookupResult {
+        try await lookup(request, to: target, apiKey: apiKey, depth: .full)
+    }
 }
 
 @MainActor
@@ -86,7 +98,7 @@ public final class GroqConfiguration {
         model = preferences.string(forKey: Self.modelStorageKey)
             .flatMap(GroqModel.init(rawValue:)) ?? .gptOSS120B
         reasoningEffort = preferences.string(forKey: Self.effortStorageKey)
-            .flatMap(GroqReasoningEffort.init(rawValue:)) ?? .medium
+            .flatMap(GroqReasoningEffort.init(rawValue:)) ?? .low
         if let first = model.supportedEfforts.first,
            !model.supportedEfforts.contains(reasoningEffort) {
             reasoningEffort = first

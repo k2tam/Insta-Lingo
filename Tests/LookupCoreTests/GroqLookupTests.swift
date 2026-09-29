@@ -95,7 +95,7 @@ func groqModelAndEffortPersistAcrossConfigurationInstances() {
     let configuration = GroqConfiguration(credentials: credentials, preferences: defaults)
 
     #expect(configuration.model == .gptOSS120B)
-    #expect(configuration.reasoningEffort == .medium)
+    #expect(configuration.reasoningEffort == .low)
 
     configuration.model = .gptOSS20B
     configuration.reasoningEffort = .high
@@ -104,6 +104,51 @@ func groqModelAndEffortPersistAcrossConfigurationInstances() {
     #expect(restored.model == .gptOSS20B)
     #expect(restored.reasoningEffort == .high)
     #expect(restored.model.supportedEfforts.contains(restored.reasoningEffort))
+}
+
+@Test @MainActor
+func repeatedGroqLookupIsServedFromCacheUntilTargetOrContextChanges() async {
+    let defaults = UserDefaults(suiteName: "GroqLookupTests.\(UUID())")!
+    let configuration = GroqConfiguration(credentials: FakeGroqCredentials(key: "secret"), preferences: defaults)
+    let groq = RecordingGroq()
+    let lookup = LookupCoordinator(
+        explainer: RecordingLocal(), groq: groq, groqConfiguration: configuration, preferences: defaults
+    )
+    lookup.selectedLanguage = .simpleEnglish
+    lookup.text = "Actor"
+    await lookup.submit()
+    lookup.text = "actor"
+    await lookup.submit()
+
+    #expect(groq.calls.count == 1)
+    #expect(lookup.phase == .result)
+    #expect(lookup.completedLookup?.result.meaning == "diễn viên")
+
+    lookup.selectedLanguage = .vietnamese
+    await lookup.submit()
+    #expect(groq.calls.count == 2)
+
+    let other = lookup.contextCatalog.contexts.first { $0.id != lookup.contextCatalog.selectedContext.id }!
+    _ = lookup.contextCatalog.select(id: other.id)
+    await lookup.submit()
+    #expect(groq.calls.count == 3)
+}
+
+@Test @MainActor
+func quickMeaningUsesQuickDepthAndIsCachedSeparately() async throws {
+    let defaults = UserDefaults(suiteName: "GroqLookupTests.\(UUID())")!
+    let configuration = GroqConfiguration(credentials: FakeGroqCredentials(key: "secret"), preferences: defaults)
+    let groq = RecordingGroq()
+    let lookup = LookupCoordinator(
+        explainer: RecordingLocal(), groq: groq, groqConfiguration: configuration, preferences: defaults
+    )
+    lookup.selectedLanguage = .vietnamese
+    lookup.text = "actor"
+    await lookup.submit()
+    _ = try await lookup.quickMeaning(for: "actor")
+    _ = try await lookup.quickMeaning(for: "actor")
+
+    #expect(groq.calls.map(\.depth) == [.full, .quick])
 }
 
 @MainActor
@@ -125,12 +170,13 @@ private final class RecordingGroq: GroqLookupProviding {
         let request: LookupRequest
         let target: TargetLanguage
         let apiKey: String
+        let depth: LookupDepth
     }
 
     var calls: [Call] = []
 
-    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String) async throws -> LookupResult {
-        calls.append(Call(request: request, target: target, apiKey: apiKey))
+    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String, depth: LookupDepth) async throws -> LookupResult {
+        calls.append(Call(request: request, target: target, apiKey: apiKey, depth: depth))
         return LookupResult(meaning: "diễn viên", example: "An actor runs on the main thread.", detail: "")
     }
 }

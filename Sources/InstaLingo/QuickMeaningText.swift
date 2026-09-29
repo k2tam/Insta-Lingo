@@ -8,6 +8,9 @@ struct QuickMeaningText: NSViewRepresentable {
     let text: String
     let font: NSFont
     let color: NSColor
+    /// Occurrences of this term are drawn in a heavier weight and brighter color.
+    var emphasis: String?
+    var emphasisColor: NSColor = .labelColor
     let isSelectionActive: Bool
     let lookup: (String, CGRect) -> Void
 
@@ -27,16 +30,34 @@ struct QuickMeaningText: NSViewRepresentable {
     }
 
     func updateNSView(_ nsView: QuickMeaningTextView, context: Context) {
-        if nsView.string != text {
-            nsView.string = text
+        let attributed = styledText()
+        if nsView.textStorage?.isEqual(to: attributed) != true {
+            nsView.textStorage?.setAttributedString(attributed)
         }
-        nsView.font = font
-        nsView.textColor = color
         nsView.onWordLookup = lookup
         if !isSelectionActive, nsView.selectedRange().length > 0 {
             nsView.setSelectedRange(NSRange(location: 0, length: 0))
         }
         nsView.invalidateIntrinsicContentSize()
+    }
+
+    private func styledText() -> NSAttributedString {
+        let styled = NSMutableAttributedString(
+            string: text,
+            attributes: [.font: font, .foregroundColor: color]
+        )
+        guard let emphasis, !emphasis.isEmpty else { return styled }
+        let bold = NSFontManager.shared.convert(font, toHaveTrait: .boldFontMask)
+        let source = text as NSString
+        var searchRange = NSRange(location: 0, length: source.length)
+        while true {
+            let found = source.range(of: emphasis, options: [.caseInsensitive, .diacriticInsensitive], range: searchRange)
+            guard found.location != NSNotFound else { break }
+            styled.addAttributes([.font: bold, .foregroundColor: emphasisColor], range: found)
+            let next = found.location + found.length
+            searchRange = NSRange(location: next, length: source.length - next)
+        }
+        return styled
     }
 
     func sizeThatFits(
