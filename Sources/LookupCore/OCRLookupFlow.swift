@@ -1,5 +1,8 @@
 import Foundation
 import Observation
+import os
+
+private let ocrDebugLogger = Logger(subsystem: "com.k2tam.InstaLingo", category: "DEBUG-ocr-9c2e")
 
 /// The capture implementation owns its image only for the duration of this call.
 /// A nil result means the user cancelled region selection.
@@ -25,7 +28,6 @@ public protocol RegionTextRecognizing {
 public final class OCRLookupFlow {
     public private(set) var isSelecting = false
     public private(set) var isRecognizing = false
-    public private(set) var isReviewing = false
     public private(set) var errorMessage: String?
 
     @ObservationIgnored private let recognizer: any RegionTextRecognizing
@@ -38,7 +40,6 @@ public final class OCRLookupFlow {
         guard !isSelecting && !isRecognizing else { return }
         isSelecting = true
         isRecognizing = false
-        isReviewing = false
         errorMessage = nil
         hidePanel()
         var automaticText: String?
@@ -54,11 +55,8 @@ public final class OCRLookupFlow {
                 let recognizedText = recognition.text.trimmingCharacters(in: .whitespacesAndNewlines)
                 if recognizedText.isEmpty {
                     errorMessage = "No readable text was found in the selected region. Try selecting a clearer area."
-                } else if Self.isSafeToSubmitAutomatically(recognition) {
-                    automaticText = recognizedText
                 } else {
-                    lookup.text = recognizedText
-                    isReviewing = true
+                    automaticText = recognizedText
                 }
             }
         } catch {
@@ -67,21 +65,15 @@ public final class OCRLookupFlow {
         }
         isSelecting = false
         isRecognizing = false
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] ocr finished text=\(automaticText != nil, privacy: .public) error=\(self.errorMessage ?? "-", privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
         if let automaticText {
             lookup.text = automaticText
             await lookup.submit()
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] lookup finished phase=\(String(describing: lookup.phase), privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
         }
     }
 
-    /// Conservative auto-submit rule: a single OCR line of at most four words,
-    /// without sentence punctuation or ambiguous symbols, and strong confidence.
-    static func isSafeToSubmitAutomatically(_ recognition: OCRRecognition) -> Bool {
-        let text = recognition.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        return recognition.confidence >= 0.90 && LookupCoordinator.isClearShortPhrase(text)
-    }
-
     public func cancelReview() {
-        isReviewing = false
         errorMessage = nil
     }
 }

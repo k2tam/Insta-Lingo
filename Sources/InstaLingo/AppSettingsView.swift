@@ -35,7 +35,7 @@ struct AppSettingsView: View {
     }
 
     let loginSettings: LaunchAtLoginSettings
-    let groqConfiguration: GroqConfiguration
+    let modelConfiguration: LookupModelConfiguration
     let hotkeys: GlobalHotkeyManager
     @Bindable var lookup: LookupCoordinator
     @Bindable var languageSettings: UILanguageSettings
@@ -105,6 +105,10 @@ struct AppSettingsView: View {
                         Text(strings.vietnamese).tag(UILanguage.vietnamese)
                         Text(strings.english).tag(UILanguage.english)
                     }
+                    Picker(strings.quickMeaningLanguageSetting, selection: $lookup.quickMeaningLanguage) {
+                        Text(strings.targetLanguageName(code: "vi")).tag(TargetLanguage.vietnamese)
+                        Text(strings.targetLanguageName(code: "en")).tag(TargetLanguage.simpleEnglish)
+                    }
                     LaunchAtLoginSettingsView(settings: loginSettings, strings: strings)
                 }
             }
@@ -114,8 +118,8 @@ struct AppSettingsView: View {
                 Section {
                     HStack(spacing: 12) {
                         SourceCard(
-                            title: strings.groq,
-                            message: strings.groqSourceSummary,
+                            title: strings.aiModel,
+                            message: strings.aiModelSourceSummary,
                             isSelected: lookup.selectedSource == .groq
                         ) { lookup.selectedSource = .groq }
                         SourceCard(
@@ -127,7 +131,7 @@ struct AppSettingsView: View {
                     .padding(.vertical, 4)
                 }
                 if lookup.selectedSource == .groq {
-                    GroqSettingsSections(configuration: groqConfiguration, strings: strings)
+                    ModelSettingsSections(configuration: modelConfiguration, strings: strings)
                 }
             }
             .formStyle(.grouped)
@@ -255,14 +259,17 @@ extension UIStrings {
     }
 
     var generalSettings: String { settingsText("Chung", "General") }
+    var quickMeaningLanguageSetting: String {
+        settingsText("Ngôn ngữ nghĩa nhanh (double-click)", "Quick meaning language (double-click)")
+    }
     var settingsTitle: String { settingsText("Cài đặt", "Settings") }
     var shortcutsSettings: String { settingsText("Phím tắt", "Shortcuts") }
     var permissionsSettings: String { settingsText("Quyền truy cập", "Permissions") }
     var permissionMissing: String { settingsText("Thiếu quyền", "Permission needed") }
-    var groqSourceSummary: String {
+    var aiModelSourceSummary: String {
         settingsText(
-            "Giải nghĩa và ví dụ phong phú hơn. Từ cần tra, ngôn ngữ và ngữ cảnh được gửi đến Groq.",
-            "Richer explanations and examples. Your word, language and context are sent to Groq."
+            "Giải nghĩa và ví dụ phong phú hơn. Từ cần tra, ngôn ngữ và ngữ cảnh được gửi đến mô hình AI đã chọn.",
+            "Richer explanations and examples. Your word, language and context are sent to the selected AI model."
         )
     }
     var localSourceSummary: String {

@@ -43,8 +43,8 @@
 		23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */; };
 		1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */; };
 		C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */; };
-		286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */; };
-		D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */; };
+		286D106D7DD171F25E19C5FD /* LLMProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBFD2B7504DA7D0447B2A316 /* LLMProvider.swift */; };
+		D7752F827C6929BB291EEFED /* ModelSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C2E935DF67F5978E9031760 /* ModelSettingsView.swift */; };
 		66FCC831D2BBD15154E34546 /* LibraryWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9928D405F5995B91A09087C2 /* LibraryWindow.swift */; };
 		B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */; };
 		3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */; };
@@ -117,8 +117,8 @@
 		77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeyManager.swift; sourceTree = "<group>"; };
 		FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalHotkeySettingsView.swift; sourceTree = "<group>"; };
 		1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqKeychain.swift; sourceTree = "<group>"; };
-		DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqProvider.swift; sourceTree = "<group>"; };
-		4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroqSettingsView.swift; sourceTree = "<group>"; };
+		DBFD2B7504DA7D0447B2A316 /* LLMProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMProvider.swift; sourceTree = "<group>"; };
+		4C2E935DF67F5978E9031760 /* ModelSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelSettingsView.swift; sourceTree = "<group>"; };
 		9928D405F5995B91A09087C2 /* LibraryWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryWindow.swift; sourceTree = "<group>"; };
 		BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstaLingoApp.swift; sourceTree = "<group>"; };
 		2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchAtLoginSettingsView.swift; sourceTree = "<group>"; };
@@ -236,8 +236,8 @@
 				77F90897C2969A2338D33EDA /* GlobalHotkeyManager.swift */,
 				FE5D147D1C6FDAF87D95FA5E /* GlobalHotkeySettingsView.swift */,
 				1BCC43460C006A87E9407EE9 /* GroqKeychain.swift */,
-				DBFD2B7504DA7D0447B2A316 /* GroqProvider.swift */,
-				4C2E935DF67F5978E9031760 /* GroqSettingsView.swift */,
+				DBFD2B7504DA7D0447B2A316 /* LLMProvider.swift */,
+				4C2E935DF67F5978E9031760 /* ModelSettingsView.swift */,
 				9928D405F5995B91A09087C2 /* LibraryWindow.swift */,
 				BE8139855A942EFB78B273F6 /* InstaLingoApp.swift */,
 				2E2C544C4B4EBDE09285CF94 /* LaunchAtLoginSettingsView.swift */,
@@ -393,8 +393,8 @@
 				23A0B976C115A514EBAC718C /* GlobalHotkeyManager.swift in Sources */,
 				1A5F90A22C9EBF1DF2A9DE2A /* GlobalHotkeySettingsView.swift in Sources */,
 				C1133ADAB606419B2470276A /* GroqKeychain.swift in Sources */,
-				286D106D7DD171F25E19C5FD /* GroqProvider.swift in Sources */,
-				D7752F827C6929BB291EEFED /* GroqSettingsView.swift in Sources */,
+				286D106D7DD171F25E19C5FD /* LLMProvider.swift in Sources */,
+				D7752F827C6929BB291EEFED /* ModelSettingsView.swift in Sources */,
 				66FCC831D2BBD15154E34546 /* LibraryWindow.swift in Sources */,
 				B1D4C71B49E1EB58D4AA7656 /* InstaLingoApp.swift in Sources */,
 				3605A8A89448CB59798DA4EE /* LaunchAtLoginSettingsView.swift in Sources */,

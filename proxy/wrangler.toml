@@ -1,0 +1,8 @@
+name = "instalingo-proxy"
+main = "worker.js"
+compatibility_date = "2025-01-01"
+
+# npx wrangler kv namespace create COUNTERS, then paste the id below.
+[[kv_namespaces]]
+binding = "COUNTERS"
+id = "99a7d2df5d024551a15111f4edcc5fc1"

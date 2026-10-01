@@ -1,5 +1,8 @@
 import AppKit
 import SwiftUI
+import os
+
+private let ocrDebugLogger = Logger(subsystem: "com.k2tam.InstaLingo", category: "DEBUG-ocr-9c2e")
 
 /// Owns the menu bar item so global shortcuts can open the same anchored panel
 /// that a click on the icon opens. Transient behavior closes it on focus loss.
@@ -38,22 +41,28 @@ final class StatusPanelController: NSObject {
     /// for AppKit to finish activating us before presenting a transient
     /// popover, or it closes immediately as an outside-app interaction.
     func showAfterActivation(focusInput: Bool) async {
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] activate start active=\(NSApp.isActive, privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
         NSApp.activate(ignoringOtherApps: true)
         for _ in 0..<50 where !NSApp.isActive {
             try? await Task.sleep(for: .milliseconds(20))
         }
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] activate done active=\(NSApp.isActive, privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
         present(focusInput: focusInput)
     }
 
     private func present(focusInput: Bool) {
         guard let button = item.button, popover.contentViewController != nil else { return }
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] present shown=\(self.popover.isShown, privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
         if !popover.isShown {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             onPresent?(focusInput)
         }
     }
 
-    func hide() { popover.performClose(nil) }
+    func hide() {
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] hide t=\(Date().timeIntervalSince1970, privacy: .public)")
+        popover.performClose(nil)
+    }
 
     @objc private func togglePanel() {
         if popover.isShown { hide() } else {

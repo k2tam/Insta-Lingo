@@ -3,7 +3,7 @@ import Testing
 @testable import LookupCore
 
 @Test @MainActor
-func selectedRegionIsReviewedAndOnlyChosenPhraseIsLookedUp() async {
+func selectedRegionIsTranslatedImmediately() async {
     let recognizer = FakeRegionRecognizer(result: OCRRecognition(text: "Swift actor isolation\nother words", confidence: 0.98))
     let explainer = RecordingExplainer()
     let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
@@ -14,15 +14,8 @@ func selectedRegionIsReviewedAndOnlyChosenPhraseIsLookedUp() async {
     await flow.start(lookup: lookup, hidePanel: { events.append("hide") }, showPanel: { events.append("show") })
 
     #expect(events == ["hide", "show"])
-    #expect(flow.isReviewing)
-    #expect(lookup.text == "Swift actor isolation\nother words")
-    #expect(explainer.requests.isEmpty)
-
-    await lookup.submit(selectedPhrase: " actor isolation ")
-
-    #expect(explainer.requests.map(\.text) == ["actor isolation"])
+    #expect(explainer.requests.map(\.text) == ["Swift actor isolation\nother words"])
     #expect(lookup.phase == .result)
-    #expect(lookup.text == "actor isolation")
 }
 
 @Test @MainActor
@@ -36,7 +29,6 @@ func cancelledRegionLeavesPanelClosedWithoutLookup() async {
     await flow.start(lookup: lookup, hidePanel: {}, showPanel: { showCount += 1 })
 
     #expect(showCount == 0)
-    #expect(!flow.isReviewing)
     #expect(flow.errorMessage == nil)
     #expect(lookup.text == "previous word")
 }
@@ -91,7 +83,6 @@ func confidentShortOCRAutomaticallyLooksUpExactlyOnce() async {
     #expect(events == ["hide", "show"])
     #expect(explainer.requests.map(\.text) == ["actor isolation"])
     #expect(lookup.phase == .result)
-    #expect(!flow.isReviewing)
     #expect(explainer.requests.count == 1)
 }
 
@@ -116,24 +107,6 @@ func regionLookupWaitsForPanelToReopenBeforeSubmitting() async {
     #expect(events == ["hide", "show-start", "show-finished", "lookup"])
     #expect(lookup.phase == .result)
     #expect(!flow.isRecognizing)
-}
-
-@Test(arguments: [
-    OCRRecognition(text: "actor isolation", confidence: 0.70),
-    OCRRecognition(text: "Swift actor isolation and asynchronous execution", confidence: 0.99),
-    OCRRecognition(text: "Swift actor\nisolation", confidence: 0.99),
-    OCRRecognition(text: "actor isolation?", confidence: 0.99),
-]) @MainActor
-func uncertainOrLongOCRWaitsForReview(result: OCRRecognition) async {
-    let explainer = RecordingExplainer()
-    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
-    let flow = OCRLookupFlow(recognizer: FakeRegionRecognizer(result: result))
-
-    await flow.start(lookup: lookup, hidePanel: {}, showPanel: {})
-
-    #expect(flow.isReviewing)
-    #expect(lookup.text == result.text)
-    #expect(explainer.requests.isEmpty)
 }
 
 @MainActor

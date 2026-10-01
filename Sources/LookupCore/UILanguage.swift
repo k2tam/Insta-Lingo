@@ -143,9 +143,11 @@ public struct UIStrings: Sendable {
     public var retrySelection: String { choose("Thử đọc lại", "Retry selection") }
     public var selectionUnavailable: String { choose("Không đọc được chữ đang bôi đen trong ứng dụng trước đó. Bạn có thể chọn vùng màn hình để nhận diện chữ.", "The previous app did not provide selected text. You can select a screen region to recognize it.") }
     public var selectRegionInstead: String { choose("Chọn vùng thay thế", "Select region instead") }
-    public var groq: String { "Groq" }
-    public var modelSettings: String { choose("Model dịch", "Lookup model") }
-    public var groqModel: String { choose("Model", "Model") }
+    public var aiModel: String { choose("Mô hình AI", "AI model") }
+    public var modelSettings: String { choose("Mô hình", "Model") }
+    public var modelPicker: String { choose("Mô hình", "Model") }
+    public var builtInModels: String { choose("Tích hợp (miễn phí, giới hạn)", "Built-in (free, limited)") }
+    public var yourModels: String { choose("Mô hình của bạn", "Your models") }
     public var reasoningEffort: String { choose("Mức suy luận", "Reasoning effort") }
     public func reasoningEffortName(_ effort: GroqReasoningEffort) -> String {
         switch effort {
@@ -154,19 +156,47 @@ public struct UIStrings: Sendable {
         case .high: choose("Cao", "High")
         }
     }
-    public var groqAPIKey: String { choose("Khóa Groq API", "Groq API key") }
-    public var saveKey: String { choose("Lưu khóa", "Save key") }
+    public var noCustomModels: String {
+        choose(
+            "Thêm endpoint tương thích OpenAI như OpenAI, Groq, OpenRouter, DeepSeek, Ollama hoặc LM Studio.",
+            "Add any OpenAI-compatible endpoint, such as OpenAI, Groq, OpenRouter, DeepSeek, Ollama or LM Studio."
+        )
+    }
+    public var addModel: String { choose("Thêm mô hình…", "Add model…") }
+    public var addModelTitle: String { choose("Thêm mô hình", "Add model") }
+    public var editModelTitle: String { choose("Sửa mô hình", "Edit model") }
+    public var editModel: String { choose("Sửa", "Edit") }
+    public var deleteModel: String { choose("Xóa", "Delete") }
+    public var deleteModelConfirmation: String { choose("Xóa mô hình này và khóa API của nó?", "Delete this model and its API key?") }
+    public var saveModel: String { choose("Lưu", "Save") }
+    public var modelName: String { choose("Tên", "Name") }
+    public var modelBaseURL: String { "Base URL" }
+    public var modelID: String { "Model ID" }
+    public var apiKeyOptional: String { choose("Khóa API (không bắt buộc)", "API key (optional)") }
+    public var apiKeyLocalHint: String {
+        choose(
+            "Có thể để trống với máy chủ chạy trên máy như Ollama hoặc LM Studio.",
+            "Can be left empty for local servers such as Ollama or LM Studio."
+        )
+    }
+    public var keepSavedKey: String { choose("Để trống để giữ khóa đã lưu", "Leave empty to keep the saved key") }
+    public var modelHasKey: String { choose("Đã lưu khóa API", "API key saved") }
     public var pasteKey: String { choose("Dán khóa từ clipboard", "Paste key from clipboard") }
     public var removeKey: String { choose("Xóa khóa", "Remove key") }
-    public var apiKeySaved: String { choose("Đã lưu khóa API", "API key saved") }
-    public func groqDisclosure(model: GroqModel) -> String {
+    public func builtInDisclosure(model: GroqModel) -> String {
         choose(
-            "Khi chọn Groq, nội dung tra, ngôn ngữ kết quả và ngữ cảnh đã chọn sẽ được gửi đến Groq để xử lý bằng \(model.rawValue).",
-            "When Groq is selected, the lookup text, result language, and selected context are sent to Groq for processing by \(model.rawValue)."
+            "Nội dung tra, ngôn ngữ kết quả và ngữ cảnh đã chọn được gửi qua máy chủ trung gian của ứng dụng đến Groq để xử lý bằng \(model.rawValue).",
+            "The lookup text, result language, and selected context pass through the app's proxy to Groq for processing by \(model.rawValue)."
+        )
+    }
+    public func customDisclosure(host: String, model: String) -> String {
+        choose(
+            "Nội dung tra, ngôn ngữ kết quả và ngữ cảnh đã chọn được gửi trực tiếp đến \(host) để xử lý bằng \(model).",
+            "The lookup text, result language, and selected context are sent directly to \(host) for processing by \(model)."
         )
     }
     public var lookupSource: String { choose("Nguồn tra nghĩa", "Lookup source") }
-    public var groqLoading: String { choose("Đang tra bằng Groq…", "Looking up with Groq…") }
+    public var groqLoading: String { choose("Đang tra bằng mô hình AI…", "Looking up with the AI model…") }
 
     /// Core and system adapters currently expose localizedDescription as text.
     /// Translate their known messages at the UI boundary; unknown errors remain
@@ -188,14 +218,18 @@ public struct UIStrings: Sendable {
             "No readable text was found in the selected region. Try selecting a clearer area.": "Không tìm thấy chữ đọc được trong vùng chọn. Hãy chọn vùng rõ hơn.",
             "macOS did not authorize this screen capture. Enable Insta Lingo in System Settings → Privacy & Security → Screen & System Audio Recording, then quit and reopen the app.": "macOS chưa cho phép chụp vùng màn hình này. Hãy bật Insta Lingo trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật → Ghi màn hình & âm thanh hệ thống, rồi thoát hẳn và mở lại ứng dụng.",
             "Could not capture the selected screen. Try again.": "Không thể chụp vùng màn hình đã chọn. Hãy thử lại.",
-            "Groq is not configured for this app.": "Ứng dụng chưa được cấu hình để dùng Groq.",
-            "Add a Groq API key in settings before using Groq.": "Thêm khóa Groq API trong cài đặt trước khi sử dụng Groq.",
-            "The Groq API key could not be accessed in Keychain.": "Không thể truy cập khóa Groq API trong Chuỗi khóa.",
-            "Groq rejected this API key. Check it in settings.": "Groq từ chối khóa API này. Hãy kiểm tra trong cài đặt.",
-            "Could not connect to Groq. Check your internet connection.": "Không thể kết nối với Groq. Hãy kiểm tra kết nối Internet.",
-            "Groq API limit or credit reached. Check your Groq account.": "Đã đạt giới hạn hoặc hết tín dụng Groq API. Hãy kiểm tra tài khoản Groq.",
-            "Groq could not complete this lookup. Try again later.": "Groq không thể hoàn tất lượt tra này. Hãy thử lại sau.",
-            "Groq returned no usable explanation. Try again.": "Groq không trả về giải nghĩa dùng được. Hãy thử lại."
+            "No AI model is configured for this app.": "Ứng dụng chưa được cấu hình mô hình AI.",
+            "The API key could not be accessed in Keychain.": "Không thể truy cập khóa API trong Chuỗi khóa.",
+            "Enter a name for this model.": "Nhập tên cho mô hình này.",
+            "Enter the model ID.": "Nhập model ID.",
+            "Enter a base URL that starts with https://.": "Nhập base URL bắt đầu bằng https://.",
+            "Use https://. Plain http:// is allowed only for localhost, 127.0.0.1 or .local servers.": "Hãy dùng https://. Chỉ cho phép http:// với máy chủ localhost, 127.0.0.1 hoặc .local.",
+            "The model provider rejected this API key. Check it in settings.": "Nhà cung cấp mô hình từ chối khóa API này. Hãy kiểm tra trong cài đặt.",
+            "Could not connect to the model provider. Check your internet connection.": "Không thể kết nối với nhà cung cấp mô hình. Hãy kiểm tra kết nối Internet.",
+            "The built-in model's limit was reached. Add your own model in settings for unlimited use.": "Mô hình tích hợp đã đạt giới hạn. Thêm mô hình của bạn trong cài đặt để dùng không giới hạn.",
+            "The model provider's limit or credit was reached. Check your account with that provider.": "Đã đạt giới hạn hoặc hết tín dụng của nhà cung cấp mô hình. Hãy kiểm tra tài khoản của bạn.",
+            "The model provider could not complete this lookup. Try again later.": "Nhà cung cấp mô hình không thể hoàn tất lượt tra này. Hãy thử lại sau.",
+            "The model returned no usable explanation. Try again.": "Mô hình không trả về giải nghĩa dùng được. Hãy thử lại."
         ]
         guard language == .vietnamese else { return message }
         if let translated = known[message] { return translated }

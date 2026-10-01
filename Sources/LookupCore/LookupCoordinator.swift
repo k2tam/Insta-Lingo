@@ -87,7 +87,7 @@ public final class LookupCoordinator {
             vietnamesePhase = .idle
         }
     }
-    /// Groq is the default when configured; the user's selection remains active until changed.
+    /// The AI model is the default when configured; the user's selection remains active until changed.
     public var selectedSource: LookupSource
     public let contextCatalog: ProfessionalContextCatalog
     public var selectedLanguage: TargetLanguage {
@@ -97,6 +97,16 @@ public final class LookupCoordinator {
                 return
             }
             preferences.set(selectedLanguage.code, forKey: Self.languageKey)
+        }
+    }
+    /// Language of the meaning shown when the user double-clicks a word.
+    public var quickMeaningLanguage: TargetLanguage {
+        didSet {
+            guard quickMeaningLanguage == .vietnamese || quickMeaningLanguage == .simpleEnglish else {
+                quickMeaningLanguage = .vietnamese
+                return
+            }
+            preferences.set(quickMeaningLanguage.code, forKey: Self.quickMeaningLanguageKey)
         }
     }
     public private(set) var availableLanguages: [TargetLanguage] = [.vietnamese, .simpleEnglish]
@@ -109,25 +119,28 @@ public final class LookupCoordinator {
     @ObservationIgnored private let explainer: any LocalExplaining
     @ObservationIgnored private let translator: (any LocalTranslating)?
     @ObservationIgnored private let groq: (any GroqLookupProviding)?
-    @ObservationIgnored private let groqConfiguration: GroqConfiguration?
+    @ObservationIgnored private let modelConfiguration: LookupModelConfiguration?
     @ObservationIgnored private let history: LookupHistory?
     @ObservationIgnored private let preferences: UserDefaults
     @ObservationIgnored private var requestGeneration = 0
     @ObservationIgnored private var completedSource: LookupSource?
     @ObservationIgnored private var cache = LookupResultCache(capacity: 200)
     private static let languageKey = "lookup.targetLanguage"
+    private static let quickMeaningLanguageKey = "lookup.quickMeaningLanguage"
 
-    public init(explainer: any LocalExplaining, translator: (any LocalTranslating)? = nil, groq: (any GroqLookupProviding)? = nil, groqConfiguration: GroqConfiguration? = nil, history: LookupHistory? = nil, preferences: UserDefaults = .standard, contextCatalog: ProfessionalContextCatalog? = nil) {
+    public init(explainer: any LocalExplaining, translator: (any LocalTranslating)? = nil, groq: (any GroqLookupProviding)? = nil, modelConfiguration: LookupModelConfiguration? = nil, history: LookupHistory? = nil, preferences: UserDefaults = .standard, contextCatalog: ProfessionalContextCatalog? = nil) {
         self.explainer = explainer
         self.translator = translator
         self.groq = groq
-        self.groqConfiguration = groqConfiguration
+        self.modelConfiguration = modelConfiguration
         self.history = history
         self.preferences = preferences
         self.contextCatalog = contextCatalog ?? ProfessionalContextCatalog(defaults: preferences)
         selectedSource = groq == nil ? .local : .groq
         let saved = preferences.string(forKey: Self.languageKey)
         selectedLanguage = saved == TargetLanguage.simpleEnglish.code ? .simpleEnglish : .vietnamese
+        let savedQuick = preferences.string(forKey: Self.quickMeaningLanguageKey)
+        quickMeaningLanguage = savedQuick == TargetLanguage.simpleEnglish.code ? .simpleEnglish : .vietnamese
     }
 
     public func loadAvailableLanguages() async {
@@ -188,7 +201,7 @@ public final class LookupCoordinator {
         }
     }
 
-    /// Resolves a temporary Vietnamese meaning without replacing or recording
+    /// Resolves a temporary meaning in the user's quick-meaning language without replacing or recording
     /// the completed lookup currently shown in the panel.
     public func quickMeaning(for text: String) async throws -> LookupResult {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -198,21 +211,24 @@ public final class LookupCoordinator {
 
         let request = LookupRequest(text: trimmed, context: contextCatalog.selectedContext)
         let source = completedSource ?? selectedSource
-        return try await resolve(request, to: .vietnamese, source: source, depth: .quick)
+        return try await resolve(request, to: quickMeaningLanguage, source: source, depth: .quick)
     }
 
     /// Serves repeat lookups from memory; only successful results are cached.
     private func resolve(_ request: LookupRequest, to target: TargetLanguage, source: LookupSource, depth: LookupDepth) async throws -> LookupResult {
+        var route: LookupRoute?
+        if source == .groq {
+            guard groq != nil, let modelConfiguration else { throw LookupError.groqUnavailable }
+            route = try modelConfiguration.routeForLookup()
+        }
         let key = LookupResultCache.Key(
             text: request.text.lowercased(), contextID: request.context.id,
-            target: target.code, source: source, depth: depth
+            target: target.code, source: source, route: route?.cacheIdentity, depth: depth
         )
         if let cached = cache.value(for: key) { return cached }
         let resolved: LookupResult
-        if source == .groq {
-            guard let groq, let groqConfiguration else { throw LookupError.groqUnavailable }
-            let apiKey = try groqConfiguration.keyForLookup()
-            resolved = try await groq.lookup(request, to: target, apiKey: apiKey, depth: depth)
+        if let groq, let route {
+            resolved = try await groq.lookup(request, to: target, route: route, depth: depth)
         } else if target.isSimpleEnglish {
             resolved = try await explainer.explain(request)
         } else if let translator {
@@ -281,7 +297,7 @@ private enum LookupError: LocalizedError {
         case .translationUnavailable:
             "Local translation is unavailable on this Mac. Your lookup was not sent to another provider."
         case .groqUnavailable:
-            "Groq is not configured for this app."
+            "No AI model is configured for this app."
         }
     }
 }
@@ -293,6 +309,8 @@ private struct LookupResultCache {
         let contextID: String
         let target: String
         let source: LookupSource
+        /// The AI model that answered, so switching models never reuses another model's result.
+        let route: String?
         let depth: LookupDepth
     }
 

@@ -10,7 +10,7 @@ struct LookupPanel: View {
     @Bindable var favorites: LookupFavorites
     let history: LookupHistory
     let hotkeys: GlobalHotkeyManager
-    let groqConfiguration: GroqConfiguration
+    let modelConfiguration: LookupModelConfiguration
     @Binding var isDetailExpanded: Bool
     @Binding var inputFocusGeneration: Int
     let hidePanel: () -> Void
@@ -51,7 +51,6 @@ struct LookupPanel: View {
                             && selectionFlow.status != .reviewing
                             && !ocrFlow.isSelecting
                             && !ocrFlow.isRecognizing
-                            && !ocrFlow.isReviewing
                             && lookup.phase != .loading,
                         selectionDisabled: selectionFlow.status == .reading || lookup.phase == .loading,
                         regionDisabled: ocrFlow.isSelecting || ocrFlow.isRecognizing || selectionFlow.status == .reading,
@@ -104,8 +103,8 @@ struct LookupPanel: View {
 
             LookupPanelFooter(
                 source: lookup.selectedSource,
-                groqModel: groqConfiguration.model,
-                hasGroqKey: groqConfiguration.hasAPIKey,
+                modelName: modelConfiguration.selectedModelDisplayName,
+                isBuiltInModel: modelConfiguration.selectedCustomModel == nil,
                 showsQuickMeaningHint: lookup.phase == .result
                     && lookup.completedLookup?.targetLanguage == .simpleEnglish,
                 strings: strings
@@ -262,16 +261,16 @@ private struct LookupPanelHeader: View {
 
 private struct LookupPanelFooter: View {
     let source: LookupSource
-    let groqModel: GroqModel
-    let hasGroqKey: Bool
+    let modelName: String
+    let isBuiltInModel: Bool
     let showsQuickMeaningHint: Bool
     let strings: UIStrings
 
-    private var isReady: Bool { source == .local || hasGroqKey }
+    private var isReady: Bool { true }
 
     private var sourceLabel: String {
         switch source {
-        case .groq: hasGroqKey ? "Groq · \(groqModel.rawValue)" : strings.groqNeedsKey
+        case .groq: isBuiltInModel ? "\(strings.groqBuiltInKey) · \(modelName)" : modelName
         case .local: strings.onThisMac
         }
     }
@@ -437,7 +436,7 @@ private struct LookupStateRegion: View {
         if selectionFlow.status == .reading { return "selection-reading" }
         if ocrFlow.isSelecting { return "region-selecting" }
         if ocrFlow.isRecognizing { return "region-recognizing" }
-        if selectionFlow.status == .reviewing || ocrFlow.isReviewing { return "reviewing" }
+        if selectionFlow.status == .reviewing { return "reviewing" }
         if let error = selectionFlow.errorMessage { return "selection-error-\(error)" }
         if let error = ocrFlow.errorMessage { return "ocr-error-\(error)" }
         if selectionFlow.status == .permissionRequired { return "permission" }
@@ -475,10 +474,10 @@ private struct LookupStateRegion: View {
             LookupMessageView(icon: "viewfinder", message: strings.selectingRegionHint)
         } else if ocrFlow.isRecognizing {
             LookupMessageView(icon: "text.viewfinder", message: strings.recognizingRegion, showsProgress: true)
-        } else if selectionFlow.status == .reviewing || ocrFlow.isReviewing {
+        } else if selectionFlow.status == .reviewing {
             CapturedTextPicker(
                 text: lookup.text,
-                intro: ocrFlow.isReviewing ? strings.reviewRegionIntro : strings.reviewSelectionIntro,
+                intro: strings.reviewSelectionIntro,
                 strings: strings,
                 submit: submitPhrase
             )
@@ -927,7 +926,7 @@ extension UIStrings {
         )
     }
     var onThisMac: String { panelText("Trên máy Mac này", "On this Mac") }
-    var groqNeedsKey: String { panelText("Groq · thêm khóa API trong Cài đặt", "Groq · add an API key in Settings") }
+    var groqBuiltInKey: String { panelText("Groq · khóa tích hợp (giới hạn)", "Groq · built-in key (limited)") }
     var quickMeaningFooterHint: String { panelText("Double-click một từ để xem nghĩa nhanh", "Double-click a word for a quick meaning") }
     var footerSave: String { panelText("lưu", "save") }
     var permissionTitle: String { panelText("Cho phép Insta Lingo đọc chữ đã bôi đen", "Allow Insta Lingo to read selected text") }
@@ -946,7 +945,6 @@ extension UIStrings {
     func orPressNextTime(_ shortcut: String) -> String {
         panelText("hoặc nhấn \(shortcut) lần sau", "or press \(shortcut) next time")
     }
-    var reviewRegionIntro: String { panelText("Đã đọc từ màn hình. Chọn từ hoặc cụm cần tra:", "Captured from screen. Pick a word or phrase to look up:") }
     var reviewSelectionIntro: String { panelText("Đoạn bôi đen khá dài. Chọn từ hoặc cụm cần tra:", "Your selection is long. Pick a word or phrase to look up:") }
     func lookUpPhrase(_ phrase: String) -> String { panelText("Tra “\(phrase)”", "Look up “\(phrase)”") }
     var shiftClickHint: String { panelText("Shift-click để chọn cả cụm", "Shift-click to select a phrase") }

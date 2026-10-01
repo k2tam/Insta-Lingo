@@ -20,6 +20,11 @@
 	<string>26.0</string>
 	<key>LSUIElement</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>Insta Lingo reads only the screen region you select to recognize text for a lookup.</string>
 </dict>

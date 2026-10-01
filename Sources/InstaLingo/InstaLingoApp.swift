@@ -20,7 +20,7 @@ private enum AppRuntime {
 @main
 struct InstaLingoApp: App {
     @State private var lookup: LookupCoordinator
-    @State private var groqConfiguration: GroqConfiguration
+    @State private var modelConfiguration: LookupModelConfiguration
     @State private var history: LookupHistory
     @State private var favorites: LookupFavorites
     @State private var languageSettings: UILanguageSettings
@@ -33,8 +33,8 @@ struct InstaLingoApp: App {
     init() {
         // The redesign is dark only: the panel and windows use dark glass.
         NSApplication.shared.appearance = NSAppearance(named: .darkAqua)
-        let groqConfiguration = GroqConfiguration(credentials: GroqKeychain())
-        let groqProvider = GroqProvider(configuration: groqConfiguration)
+        let modelConfiguration = LookupModelConfiguration(credentials: GroqKeychain())
+        let groqProvider = LLMProvider(configuration: modelConfiguration)
         groqProvider.warmUp()
         let history = LookupHistory()
         let favorites = LookupFavorites()
@@ -42,7 +42,7 @@ struct InstaLingoApp: App {
             explainer: LocalFoundationExplainer(),
             translator: LocalAppleTranslator(),
             groq: groqProvider,
-            groqConfiguration: groqConfiguration,
+            modelConfiguration: modelConfiguration,
             history: history
         )
         let ocrFlow = OCRLookupFlow(recognizer: ScreenRegionOCR())
@@ -72,7 +72,7 @@ struct InstaLingoApp: App {
                 favorites: favorites,
                 history: history,
                 hotkeys: hotkeys,
-                groqConfiguration: groqConfiguration,
+                modelConfiguration: modelConfiguration,
                 isDetailExpanded: Binding(
                     get: { panelState.isDetailExpanded },
                     set: { panelState.isDetailExpanded = $0 }
@@ -90,7 +90,7 @@ struct InstaLingoApp: App {
                     statusPanel.hide()
                     supplementaryWindows.showSettings(content: AppSettingsView(
                         loginSettings: loginSettings,
-                        groqConfiguration: groqConfiguration,
+                        modelConfiguration: modelConfiguration,
                         hotkeys: hotkeys,
                         lookup: lookup,
                         languageSettings: languageSettings
@@ -135,7 +135,7 @@ struct InstaLingoApp: App {
         }
 
         _history = State(initialValue: history)
-        _groqConfiguration = State(initialValue: groqConfiguration)
+        _modelConfiguration = State(initialValue: modelConfiguration)
         _favorites = State(initialValue: favorites)
         _lookup = State(initialValue: lookup)
         _languageSettings = State(initialValue: languageSettings)
@@ -149,7 +149,7 @@ struct InstaLingoApp: App {
         Settings {
             AppSettingsView(
                 loginSettings: loginSettings,
-                groqConfiguration: groqConfiguration,
+                modelConfiguration: modelConfiguration,
                 hotkeys: hotkeys,
                 lookup: lookup,
                 languageSettings: languageSettings

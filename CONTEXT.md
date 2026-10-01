@@ -32,6 +32,10 @@ _Avoid_: Câu trả lời AI
 Tập hợp các lượt tra trước đây để người dùng tìm và xem lại trong cửa sổ ứng dụng.
 _Avoid_: Kết quả gần nhất
 
+**Mô hình tùy chỉnh**:
+Endpoint tương thích OpenAI mà người dùng tự thêm (tên, base URL, model ID và khóa API tùy chọn) để dùng thay cho mô hình tích hợp; nội dung tra được gửi thẳng đến host của endpoint đó.
+_Avoid_: Khóa Groq, nhà cung cấp
+
 **Mục yêu thích**:
 Từ hoặc cụm ngắn mà người dùng chủ động đánh dấu để xem lại và ghi nhớ, cùng với nghĩa, ngôn ngữ đích và ngữ cảnh chuyên môn lúc đánh dấu.
 _Avoid_: Lượt tra gần đây

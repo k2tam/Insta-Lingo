@@ -3,22 +3,65 @@ import CoreGraphics
 import LookupCore
 import ScreenCaptureKit
 import Vision
+import os
+
+private let ocrDebugLogger = Logger(subsystem: "com.k2tam.InstaLingo", category: "DEBUG-ocr-9c2e")
 
 @MainActor
 final class ScreenRegionOCR: RegionTextRecognizing {
+    init() {
+        Self.warmUpVision()
+    }
+
+    /// The first Vision text request loads its models, which can take seconds.
+    /// Run a throwaway recognition at launch so the first real capture is fast.
+    private static func warmUpVision() {
+        Task.detached(priority: .utility) {
+            guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+                  let context = CGContext(
+                    data: nil, width: 128, height: 64, bitsPerComponent: 8, bytesPerRow: 0,
+                    space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+                  ) else { return }
+            context.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+            context.fill(CGRect(x: 0, y: 0, width: 128, height: 64))
+            guard let image = context.makeImage() else { return }
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] vision warm-up start t=\(Date().timeIntervalSince1970, privacy: .public)")
+            for level in [VNRequestTextRecognitionLevel.accurate, .fast] {
+                let request = VNRecognizeTextRequest()
+                request.recognitionLevel = level
+                request.recognitionLanguages = ["en-US"]
+                try? VNImageRequestHandler(cgImage: image).perform([request])
+            }
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] vision warm-up done t=\(Date().timeIntervalSince1970, privacy: .public)")
+        }
+    }
+
     func recognizeSelectedRegion(onSelection: @MainActor () async -> Void) async throws -> OCRRecognition? {
         guard CGPreflightScreenCaptureAccess() || CGRequestScreenCaptureAccess() else {
             throw ScreenRegionError.permissionDenied
         }
+        // Enumerating shareable content is slow on first use; overlap it with the drag.
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] shareable content start t=\(Date().timeIntervalSince1970, privacy: .public)")
+        let contentTask = Task {
+            let snapshot = ShareableContentSnapshot(content: try await SCShareableContent.current)
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] shareable content done t=\(Date().timeIntervalSince1970, privacy: .public)")
+            return snapshot
+        }
         let session = ScreenRegionSelectionSession()
-        guard let region = await session.selectRegion() else { return nil }
+        guard let region = await session.selectRegion() else {
+            contentTask.cancel()
+            return nil
+        }
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] region selected t=\(Date().timeIntervalSince1970, privacy: .public)")
         await onSelection()
+        ocrDebugLogger.notice("[DEBUG-ocr-9c2e] panel shown t=\(Date().timeIntervalSince1970, privacy: .public)")
 
         // The CGImage is confined to this function. Neither the flow state nor
         // the lookup request has an image field, and nothing is written to disk.
         let image: CGImage
         do {
-            let content = try await SCShareableContent.current
+            let content = try await contentTask.value.content
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] content awaited t=\(Date().timeIntervalSince1970, privacy: .public)")
             guard let display = content.displays.first(where: { $0.displayID == region.displayID }) else {
                 throw ScreenRegionError.displayUnavailable
             }
@@ -30,8 +73,11 @@ final class ScreenRegionOCR: RegionTextRecognizing {
             configuration.width = Int(ceil(region.rect.width * CGFloat(filter.pointPixelScale)))
             configuration.height = Int(ceil(region.rect.height * CGFloat(filter.pointPixelScale)))
             configuration.showsCursor = false
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] capture start t=\(Date().timeIntervalSince1970, privacy: .public)")
             image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration)
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] capture done t=\(Date().timeIntervalSince1970, privacy: .public)")
         } catch {
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] capture failed \(error.localizedDescription, privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
             let captureError = error as NSError
             if captureError.domain == SCStreamErrorDomain,
                captureError.code == SCStreamError.userDeclined.rawValue {
@@ -40,19 +86,54 @@ final class ScreenRegionOCR: RegionTextRecognizing {
             throw error
         }
         return try await Task.detached(priority: .userInitiated) {
-            let request = VNRecognizeTextRequest()
-            request.recognitionLevel = .accurate
-            request.recognitionLanguages = ["en-US"]
-            request.usesLanguageCorrection = true
-            let handler = VNImageRequestHandler(cgImage: image)
-            try handler.perform([request])
-            let candidates = request.results?.compactMap { $0.topCandidates(1).first } ?? []
-            return OCRRecognition(
-                text: candidates.map(\.string).joined(separator: "\n"),
-                confidence: candidates.map(\.confidence).min() ?? 0
-            )
+            // ScreenCaptureKit buffers can carry display-specific color spaces or
+            // be very small; Vision's reader (CRImageReaderError) rejects both.
+            // Re-render into a plain sRGB bitmap with a minimum edge first.
+            ocrDebugLogger.notice("[DEBUG-ocr-9c2e] vision start t=\(Date().timeIntervalSince1970, privacy: .public)")
+            let prepared = Self.normalized(image) ?? image
+            var lastError: Error?
+            for level in [VNRequestTextRecognitionLevel.accurate, .fast] {
+                do {
+                    let request = VNRecognizeTextRequest()
+                    request.recognitionLevel = level
+                    request.recognitionLanguages = ["en-US"]
+                    request.usesLanguageCorrection = level == .accurate
+                    try VNImageRequestHandler(cgImage: prepared).perform([request])
+                    ocrDebugLogger.notice("[DEBUG-ocr-9c2e] vision done level=\(level.rawValue, privacy: .public) t=\(Date().timeIntervalSince1970, privacy: .public)")
+                    let candidates = request.results?.compactMap { $0.topCandidates(1).first } ?? []
+                    return OCRRecognition(
+                        text: candidates.map(\.string).joined(separator: "\n"),
+                        confidence: candidates.map(\.confidence).min() ?? 0
+                    )
+                } catch {
+                    lastError = error
+                }
+            }
+            throw lastError ?? ScreenRegionError.displayUnavailable
         }.value
     }
+
+    nonisolated private static func normalized(_ image: CGImage) -> CGImage? {
+        let minEdge = 64
+        let width = max(image.width, minEdge)
+        let height = max(image.height, minEdge)
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(
+                data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: 0,
+                space: space, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+              ) else { return nil }
+        context.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        context.fill(CGRect(x: 0, y: 0, width: width, height: height))
+        // Keep the capture top-left aligned inside any white padding.
+        context.draw(image, in: CGRect(x: 0, y: height - image.height, width: image.width, height: image.height))
+        return context.makeImage()
+    }
+}
+
+/// `SCShareableContent` is an immutable snapshot but isn't marked `Sendable`,
+/// so box it to hand it back from the task that prefetches it.
+private struct ShareableContentSnapshot: @unchecked Sendable {
+    let content: SCShareableContent
 }
 
 private enum ScreenRegionError: LocalizedError {

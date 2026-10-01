@@ -5,11 +5,11 @@ import Testing
 @Test @MainActor
 func localFailureDoesNotSwitchToGroq() async {
     let groq = IsolationRecordingGroq()
-    let configuration = GroqConfiguration(credentials: EmptyGroqCredentials())
+    let configuration = LookupModelConfiguration(credentials: EmptyGroqCredentials())
     let lookup = LookupCoordinator(
         explainer: UnavailableExplainer(),
         groq: groq,
-        groqConfiguration: configuration,
+        modelConfiguration: configuration,
         preferences: UserDefaults(suiteName: "LocalSourceIsolationTests.\(UUID())")!
     )
     lookup.selectedSource = .local
@@ -35,16 +35,16 @@ private struct UnavailableError: LocalizedError, LocalLookupUnavailable {
 
 @MainActor
 private struct EmptyGroqCredentials: GroqCredentialStoring {
-    func read() throws -> String? { nil }
-    func save(_ key: String) throws {}
-    func delete() throws {}
+    func read(account: String) throws -> String? { nil }
+    func save(_ key: String, account: String) throws {}
+    func delete(account: String) throws {}
 }
 
 @MainActor
 private final class IsolationRecordingGroq: GroqLookupProviding {
     var requests: [LookupRequest] = []
 
-    func lookup(_ request: LookupRequest, to target: TargetLanguage, apiKey: String, depth: LookupDepth) async throws -> LookupResult {
+    func lookup(_ request: LookupRequest, to target: TargetLanguage, route: LookupRoute, depth: LookupDepth) async throws -> LookupResult {
         requests.append(request)
         return LookupResult(meaning: "groq", example: "example", detail: "")
     }
