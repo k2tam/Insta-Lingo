@@ -68,7 +68,7 @@ Groq chạy `openai/gpt-oss-120b` là nguồn mặc định để giải nghĩa 
 - Bản đầu dành cho dùng riêng trên Apple Silicon và macOS mới; nguồn của nội dung cần tra là tiếng Anh, đơn vị tra là từ hoặc cụm ngắn.
 - Giao diện tra nhanh là một bảng neo dưới icon menu bar theo cảm giác menu hệ thống macOS. Ô nhập, lấy chữ bôi đen, kéo vùng, chọn ngôn ngữ, chọn ngữ cảnh, trạng thái và kết quả đều ở cùng bảng. Nguồn xử lý được chọn trong Cài đặt.
 - Bảng tự đóng khi mất tương tác và giữ kết quả gần nhất trong phiên ứng dụng. Cửa sổ ứng dụng riêng chỉ phục vụ lịch sử tra, mục yêu thích và cài đặt.
-- Có ba đường lấy nội dung cần tra: nhập tay, đọc chữ bôi đen qua Accessibility, và nhận diện từ vùng chọn màn hình qua OCR. Nếu Accessibility không đọc được, hướng người dùng sang kéo vùng; không tự sao chép qua clipboard.
+- Có ba đường lấy nội dung cần tra: nhập tay, đọc chữ bôi đen qua Accessibility, và nhận diện từ vùng chọn màn hình qua OCR. Nếu Accessibility không đọc được (ví dụ tin nhắn WhatsApp), ứng dụng gửi ⌘C tới ứng dụng đang dùng để lấy đúng phần đã bôi đen, rồi khôi phục nội dung clipboard trước đó; nếu vẫn không có chữ, hướng người dùng sang kéo vùng.
 - Vùng chọn hỗ trợ màn hình chính, màn hình phụ và tài liệu toàn màn hình. Bảng tra ẩn trong lúc chọn; sau OCR bảng trở lại vị trí neo.
 - Chữ bôi đen và OCR đều điền vào ô nhập duy nhất. Từ/cụm ngắn rõ ràng được tra ngay; OCR còn phải đạt độ tin cậy cao. Khi nhận nhiều chữ hoặc OCR chưa chắc, người dùng xem, sửa hoặc bôi đen từ/cụm trong cùng ô rồi bấm Tra nghĩa. Ô nhập giãn tối đa năm dòng; khi tra phần bôi đen, ô đổi thành đúng từ/cụm đó. Nội dung dài chưa có phần bôi đen không được gửi. Lượt tra chỉ dùng ngữ cảnh chuyên môn đang chọn. Hủy chọn vùng hoặc OCR thất bại giữ nguyên ô và kết quả cũ; nội dung mới được điền thì ẩn kết quả cũ. Ảnh vùng chọn chỉ tồn tại trong quá trình OCR.
 - Câu ngữ cảnh chỉ đến từ nội dung mà người dùng tự chọn. Ứng dụng không tự đọc văn bản bên ngoài phần đã chọn.
@@ -96,7 +96,7 @@ Groq chạy `openai/gpt-oss-120b` là nguồn mặc định để giải nghĩa 
 
 - Bản phát hành công khai, hỗ trợ Intel hoặc macOS cũ.
 - Tra cả đoạn văn dài, dịch toàn trang hoặc giải thích nhiều thuật ngữ trong một lượt tra.
-- Tự đọc nội dung ngoài vùng người dùng đã chọn, lưu ảnh chụp màn hình, hoặc dùng clipboard làm đường dự phòng âm thầm.
+- Tự đọc nội dung ngoài vùng người dùng đã chọn, lưu ảnh chụp màn hình, hoặc giữ lại nội dung clipboard của người dùng bị thay đổi sau khi lấy chữ bôi đen bằng ⌘C.
 - Đồng bộ dữ liệu giữa thiết bị, tài khoản, chia sẻ từ vựng, flashcard hoặc nhắc ôn theo lịch.
 - Tự động gửi ảnh chụp hoặc văn bản ngoài phần người dùng đã chọn tới dịch vụ cloud.
 

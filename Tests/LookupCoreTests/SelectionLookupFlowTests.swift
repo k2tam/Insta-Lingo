@@ -52,6 +52,104 @@ func transientlyUnavailableBrowserSelectionIsRetried() async {
     #expect(flow.status == .idle)
 }
 
+@Test @MainActor
+func slowAccessibilityTreeIsRetriedUntilTheLastAttempt() async {
+    let reader = SequencedSelectedTextReader(results: [.unavailable, .unavailable, .unavailable, .unavailable, .selected("chat")])
+    let explainer = SelectionRecordingExplainer()
+    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(reader: reader)
+
+    await flow.start(lookup: lookup)
+
+    #expect(reader.calls == 5)
+    #expect(explainer.requests.map(\.text) == ["chat"])
+}
+
+@Test @MainActor
+func fallbackReaderIsTriedOnceAfterAccessibilityGivesUp() async {
+    let reader = StubSelectedTextReader(result: .unavailable)
+    let fallback = SequencedSelectedTextReader(results: [.selected("copied")])
+    let explainer = SelectionRecordingExplainer()
+    let lookup = LookupCoordinator(explainer: explainer, preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(reader: reader, fallbackReader: fallback)
+
+    await flow.start(lookup: lookup)
+
+    #expect(fallback.calls == 1)
+    #expect(explainer.requests.map(\.text) == ["copied"])
+}
+
+@Test @MainActor
+func fallbackReaderIsSkippedWhenPermissionIsRequired() async {
+    let fallback = SequencedSelectedTextReader(results: [])
+    let lookup = LookupCoordinator(explainer: SelectionRecordingExplainer(), preferences: UserDefaults(suiteName: UUID().uuidString)!)
+    let flow = SelectionLookupFlow(reader: StubSelectedTextReader(result: .permissionRequired), fallbackReader: fallback)
+
+    await flow.start(lookup: lookup)
+
+    #expect(fallback.calls == 0)
+    #expect(flow.status == .permissionRequired)
+}
+
+@Test @MainActor
+func appWhereOnlyFallbackWorksStartsWithFallbackNextTime() async {
+    let preferences = UserDefaults(suiteName: UUID().uuidString)!
+    let reader = CountingSelectedTextReader(result: .unavailable)
+    let fallback = CountingSelectedTextReader(result: .selected("chat"))
+    let lookup = LookupCoordinator(explainer: SelectionRecordingExplainer(), preferences: preferences)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(reader: reader, fallbackReader: fallback, sourceAppID: { "net.whatsapp.WhatsApp" }, preferences: preferences)
+
+    await flow.start(lookup: lookup)
+    #expect(reader.calls == 5)
+    #expect(fallback.calls == 1)
+
+    await flow.start(lookup: lookup)
+    #expect(reader.calls == 5)
+    #expect(fallback.calls == 2)
+}
+
+@Test @MainActor
+func rememberedAppIsKeptWhenNothingIsSelectedAndForgottenWhenPrimaryWorks() async {
+    let preferences = UserDefaults(suiteName: UUID().uuidString)!
+    preferences.set(["net.whatsapp.WhatsApp"], forKey: SelectionLookupFlow.fallbackFirstAppsKey)
+    let reader = CountingSelectedTextReader(result: .unavailable)
+    let fallback = CountingSelectedTextReader(result: .unavailable)
+    let lookup = LookupCoordinator(explainer: SelectionRecordingExplainer(), preferences: preferences)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(reader: reader, fallbackReader: fallback, sourceAppID: { "net.whatsapp.WhatsApp" }, preferences: preferences)
+
+    await flow.start(lookup: lookup)
+    #expect(flow.status == .regionFallback)
+    #expect(preferences.stringArray(forKey: SelectionLookupFlow.fallbackFirstAppsKey) == ["net.whatsapp.WhatsApp"])
+
+    flow.reset()
+    reader.result = .selected("chat")
+    await flow.start(lookup: lookup)
+    #expect(preferences.stringArray(forKey: SelectionLookupFlow.fallbackFirstAppsKey) == [])
+}
+
+@Test @MainActor
+func appsWhereAccessibilityWorksNeverUseFallback() async {
+    let preferences = UserDefaults(suiteName: UUID().uuidString)!
+    let fallback = CountingSelectedTextReader(result: .selected("copied"))
+    let lookup = LookupCoordinator(explainer: SelectionRecordingExplainer(), preferences: preferences)
+    lookup.selectedLanguage = .simpleEnglish
+    let flow = SelectionLookupFlow(
+        reader: StubSelectedTextReader(result: .selected("safari")),
+        fallbackReader: fallback,
+        sourceAppID: { "com.apple.Safari" },
+        preferences: preferences
+    )
+
+    await flow.start(lookup: lookup)
+
+    #expect(fallback.calls == 0)
+    #expect(preferences.stringArray(forKey: SelectionLookupFlow.fallbackFirstAppsKey) == nil)
+}
+
 @Test(arguments: [SelectionReadResult.unavailable, .selected("   ")]) @MainActor
 func unreadableOrEmptySelectionOffersRegionFallback(result: SelectionReadResult) async {
     let explainer = SelectionRecordingExplainer()
@@ -80,6 +178,17 @@ private final class SequencedSelectedTextReader: SelectedTextReading {
     func readSelectedText() async -> SelectionReadResult {
         calls += 1
         return results.removeFirst()
+    }
+}
+
+@MainActor
+private final class CountingSelectedTextReader: SelectedTextReading {
+    var result: SelectionReadResult
+    var calls = 0
+    init(result: SelectionReadResult) { self.result = result }
+    func readSelectedText() async -> SelectionReadResult {
+        calls += 1
+        return result
     }
 }
 

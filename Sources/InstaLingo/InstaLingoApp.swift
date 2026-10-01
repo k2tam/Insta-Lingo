@@ -47,7 +47,10 @@ struct InstaLingoApp: App {
         )
         let ocrFlow = OCRLookupFlow(recognizer: ScreenRegionOCR())
         let selectionFlow = SelectionLookupFlow(
-            reader: AccessibilitySelectedTextReader(previousApp: PreviousAppTracker())
+            reader: AccessibilitySelectedTextReader(previousApp: PreviousAppTracker()),
+            fallbackReader: ClipboardSelectedTextReader(),
+            // Read when the hotkey fires, before our panel takes focus.
+            sourceAppID: { NSWorkspace.shared.frontmostApplication?.bundleIdentifier }
         )
         let languageSettings = UILanguageSettings()
         let supplementaryWindows = SupplementaryWindowsController(
